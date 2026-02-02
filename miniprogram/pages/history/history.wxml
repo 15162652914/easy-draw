@@ -24,13 +24,13 @@
   <view wx:elif="{{error}}" class="empty-container">
     <image class="empty-icon" src="/images/icons/error.png" />
     <text class="empty-text">{{error}}</text>
-    <button class="retry-btn" bindtap="loadHistory" data-refresh="{{true}}">点击重试</button>
+    <view class="retry-btn" bindtap="loadHistory" data-refresh="{{true}}">点击重试</view>
   </view>
   
   <view wx:elif="{{draws.length === 0}}" class="empty-container">
     <image class="empty-icon" src="/images/icons/empty.png" />
     <text class="empty-text">暂无{{activeTab === 'participated' ? '参与的' : '创建的'}}抽签记录</text>
-    <button class="create-btn" bindtap="goToCreate">去创建</button>
+    <view class="create-btn" bindtap="goToCreate">去创建</view>
   </view>
   
   <view wx:else class="draws-list">
