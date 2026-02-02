@@ -1,0 +1,174 @@
+const { getDrawDetail } = require('../../utils/db')
+const { formatTime } = require('../../utils/util')
+const { DRAW_STATUS, DRAW_STATUS_TEXT } = require('../../utils/constants')
+
+Page({
+  data: {
+    drawId: '',
+    drawDetail: null,
+    loading: true,
+    error: '',
+    isCreator: false,
+    hasParticipated: false,
+    myResult: null,
+    groupedParticipants: {},
+    openId: ''
+  },
+
+  onLoad(options) {
+    const openId = wx.getStorageSync('openId')
+    this.setData({ openId })
+
+    if (options.drawId) {
+      this.setData({ drawId: options.drawId })
+      this.loadDrawDetail()
+    } else {
+      this.setData({ error: '缺少抽签ID', loading: false })
+    }
+  },
+
+  onPullDownRefresh() {
+    this.loadDrawDetail().then(() => {
+      wx.stopPullDownRefresh()
+    })
+  },
+
+  async loadDrawDetail() {
+    const { drawId, openId } = this.data
+    
+    if (!drawId) {
+      this.setData({ error: '缺少抽签ID', loading: false })
+      return
+    }
+    
+    this.setData({ loading: true, error: '' })
+    
+    try {
+      const result = await getDrawDetail(drawId)
+      
+      if (result.success) {
+        const detail = result.data
+        console.log('抽签详情:', detail)
+        const myParticipation = detail.participants?.find(p => p.openId === openId)
+
+        const processedDetail = this.processDrawData(detail, openId)
+
+        this.setData({
+          drawDetail: processedDetail,
+          isCreator: detail._openid === openId,
+          hasParticipated: !!myParticipation,
+          myResult: myParticipation?.result ?? null,
+          loading: false
+        })
+      } else {
+        this.setData({ error: result.message, loading: false })
+      }
+    } catch (error) {
+      console.error('加载抽签详情失败:', error)
+      this.setData({ error: '加载失败，请重试', loading: false })
+    }
+  },
+
+  processDrawData(draw, openId) {
+    if (!draw) return null
+
+    draw.createTimeFormatted = formatTime(draw.createTime)
+    
+    const typeMap = {
+      'sequence': '顺序抽签',
+      'random': '随机抽选',
+      'group': '分组抽签'
+    }
+    draw.typeText = typeMap[draw.type] || '普通抽签'
+
+    // 兼容旧字符串状态，转换为数字枚举
+    let statusVal = draw.status
+    if (typeof statusVal === 'string') {
+      if (statusVal === 'closed') statusVal = DRAW_STATUS.CLOSED
+      else statusVal = DRAW_STATUS.ONGOING
+    }
+    draw.status = typeof statusVal === 'number' ? statusVal : DRAW_STATUS.ONGOING
+    draw.statusText = DRAW_STATUS_TEXT[draw.status] || ''
+    draw.statusClass = draw.status === DRAW_STATUS.ONGOING ? 'ongoing' : 'closed'
+
+    if (draw.participants) {
+      draw.participants.forEach(p => {
+        p.drawTimeFormatted = formatTime(p.drawTime)
+      })
+    }
+
+    if (draw.type === 'group' && draw.status === DRAW_STATUS.CLOSED) {
+      const grouped = draw.participants.reduce((acc, p) => {
+        const groupName = p.result || '未分配'
+        if (!acc[groupName]) acc[groupName] = []
+        acc[groupName].push(p)
+        return acc
+      }, {})
+      draw.groupedParticipants = grouped
+    }
+
+    return draw
+  },
+
+  onShareAppMessage() {
+    const { drawId, drawDetail } = this.data
+    const title = drawDetail?.title ? `邀请你参与抽签：${drawDetail.title}` : '快来参与这个好玩的抽签'
+    const path = `/pages/draw/draw?drawId=${drawId}`
+    
+    return {
+      title: title,
+      path: path,
+      imageUrl: ''
+    }
+  },
+
+  onShareTimeline() {
+    const { drawId, drawDetail } = this.data
+    return {
+      title: drawDetail?.title || '一个有趣的抽签',
+      query: `drawId=${drawId}`,
+      imageUrl: ''
+    }
+  },
+
+  copyResult() {
+    const { drawDetail } = this.data
+    if (!drawDetail || drawDetail.status !== DRAW_STATUS.CLOSED) {
+      wx.showToast({ title: '抽签未结束', icon: 'none' })
+      return
+    }
+
+    let resultText = `抽签主题：${drawDetail.title}\n`
+    resultText += `参与人数：${drawDetail.participants.length}\n`
+    resultText += '-------------------\n'
+
+    if (drawDetail.type === 'group') {
+      for (const groupName in drawDetail.groupedParticipants) {
+        resultText += `【${groupName}】\n`
+        const members = drawDetail.groupedParticipants[groupName].map(p => p.nickname).join('、')
+        resultText += `${members}\n`
+      }
+    } else {
+      drawDetail.participants.forEach(p => {
+        resultText += `${p.nickname} -> ${p.result}\n`
+      })
+    }
+
+    wx.setClipboardData({
+      data: resultText,
+      success: () => {
+        wx.showToast({ title: '结果已复制' })
+      }
+    })
+  },
+
+  goToDraw() {
+    wx.navigateTo({
+      url: `/pages/draw/draw?drawId=${this.data.drawId}`,
+    })
+  },
+
+  goToHome() {
+    wx.switchTab({ url: '/pages/index/index' })
+  }
+})

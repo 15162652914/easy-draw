@@ -1,0 +1,205 @@
+.container {
+  min-height: 100vh;
+  background-color: #f7f8fa;
+  padding-top: 100rpx; /* 为吸顶的 tab-bar 留出空间 */
+}
+
+.tab-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background-color: #fff;
+  z-index: 10;
+  height: 100rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #666;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active {
+  color: #667eea;
+  font-weight: bold;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 16rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 6rpx;
+  background-color: #667eea;
+  border-radius: 3rpx;
+}
+
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 150rpx 0;
+}
+
+.empty-icon {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 40rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 40rpx;
+}
+
+.retry-btn, .create-btn {
+  height: 80rpx;
+  line-height: 80rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 40rpx;
+  padding: 0 60rpx;
+  border: none;
+}
+
+.draws-list {
+  padding: 24rpx;
+}
+
+.draw-card {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.draw-card:active {
+  transform: scale(0.98);
+}
+
+.draw-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+
+.draw-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+  line-height: 1.4;
+  margin-right: 20rpx;
+}
+
+.draw-status {
+  font-size: 24rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.draw-status.active {
+  background-color: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+}
+
+.draw-status.completed {
+  background-color: #f0f0f0;
+  color: #999;
+}
+
+.draw-body {
+  padding-bottom: 20rpx;
+  margin-bottom: 20rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.info-line {
+  display: flex;
+  align-items: center;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.info-line:last-child {
+  margin-bottom: 0;
+}
+
+.info-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 12rpx;
+  opacity: 0.6;
+}
+
+.my-result .result-value {
+  color: #ff976a;
+  font-weight: bold;
+  margin-left: 8rpx;
+}
+
+.draw-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.draw-participants {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.draw-participants .count {
+  color: #667eea;
+  font-weight: bold;
+}
+
+.loading-more, .no-more {
+  text-align: center;
+  color: #999;
+  font-size: 24rpx;
+  padding: 20rpx 0;
+}
+
+/* Skeleton Loading */
+.skeleton-list {
+  padding: 24rpx;
+}
+.skeleton-card {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  height: 280rpx;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

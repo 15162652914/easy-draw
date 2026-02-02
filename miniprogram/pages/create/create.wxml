@@ -1,0 +1,85 @@
+<view class="container">
+  <view class="card">
+    <view class="form-item">
+      <view class="label-wrapper">
+        <text class="icon">📝</text>
+        <text class="label">抽签标题</text>
+      </view>
+      <input 
+        class="input" 
+        placeholder="给你的抽签起个名字吧" 
+        value="{{title}}" 
+        bindinput="onTitleChange"
+      />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="form-item">
+      <view class="label-wrapper">
+        <text class="icon">🗳️</text>
+        <text class="label">抽签选项</text>
+      </view>
+      <text class="tip">点击选项可编辑，点击右侧按钮可删除</text>
+      
+      <view class="options-list">
+        <view 
+          wx:for="{{options}}" 
+          wx:key="index" 
+          class="option-item"
+        >
+          <input 
+            class="option-input" 
+            value="{{item}}" 
+            placeholder="请输入选项内容"
+            data-index="{{index}}"
+            bindinput="onOptionChange"
+          />
+          <view class="delete-btn" bindtap="deleteOption" data-index="{{index}}">
+            <image src="/images/icons/delete.png" class="delete-icon" />
+          </view>
+        </view>
+      </view>
+      
+      <view class="add-option-btn" bindtap="addOption">
+        <text class="add-icon">+</text>
+        <text>添加一个选项</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="form-item">
+      <view class="label-wrapper">
+        <text class="icon">⏰</text>
+        <text class="label">过期时间</text>
+      </view>
+      <picker 
+        class="picker" 
+        mode="date" 
+        value="{{expireDate}}" 
+        start="{{today}}"
+        bindchange="onExpireDateChange"
+      >
+        <view class="{{expireDate ? '' : 'placeholder'}}">{{expireDate || '不设置（永久有效）'}}</view>
+      </picker>
+    </view>
+  </view>
+  
+  <view class="footer">
+    <button
+      class="save-template-btn"
+      bindtap="saveTemplate"
+      disabled="{{!title || options.length < 1}}"
+    >
+      保存为模板
+    </button>
+    <button 
+      class="create-btn" 
+      bindtap="createDraw"
+      disabled="{{!title || options.length < 2}}"
+    >
+      创建抽签
+    </button>
+  </view>
+</view>

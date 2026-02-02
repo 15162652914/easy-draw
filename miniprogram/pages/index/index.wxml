@@ -1,0 +1,21 @@
+<view class="container">
+  <!-- Header -->
+  <view class="header">
+    <view class="title">轻松抽签</view>
+    <view class="subtitle">快速、公正、趣味的在线抽签工具</view>
+  </view>
+
+  <!-- Template List -->
+  <view class="template-section-title">或从模板快速创建</view>
+  <view class="template-list">
+    <block wx:for="{{templates}}" wx:key="templateId">
+      <view class="template-card" bindtap="selectTemplate" data-template-id="{{item.templateId}}">
+        <view class="template-icon">{{item.icon}}</view>
+        <view class="template-content">
+          <text class="template-title">{{item.title}}</text>
+          <text class="template-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

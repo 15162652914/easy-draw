@@ -1,0 +1,114 @@
+.container {
+  min-height: 100vh;
+  background-color: #f7f8fa;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+/* User Info Card */
+.user-info-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24rpx;
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 20rpx rgba(118, 75, 162, 0.2);
+  color: #fff;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 32rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.5);
+}
+
+.user-details {
+  flex: 1;
+}
+
+.nickname {
+  font-size: 40rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.login-tip {
+  font-size: 26rpx;
+  opacity: 0.8;
+}
+
+.arrow-icon {
+  width: 36rpx;
+  height: 36rpx;
+  opacity: 0.8;
+}
+
+/* Menu Section */
+.menu-section {
+  background-color: #fff;
+  border-radius: 20rpx;
+  margin-bottom: 32rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 32rpx;
+  position: relative;
+  transition: background-color 0.2s ease;
+  background-color: #fff; /* For button reset */
+  border: none; /* For button reset */
+  text-align: left; /* For button reset */
+  line-height: 1.5; /* For button reset */
+  border-radius: 0; /* For button reset */
+  width: 100%; /* For button reset */
+  box-sizing: border-box;
+}
+
+.menu-item::after {
+  content: '';
+  position: absolute;
+  left: 104rpx; /* icon width + padding */
+  right: 0;
+  bottom: 0;
+  height: 1rpx;
+  background-color: #f0f0f0;
+}
+
+.menu-item:last-child::after {
+  display: none;
+}
+
+.menu-item:active {
+  background-color: #f9f9f9;
+}
+
+.menu-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: 24rpx;
+}
+
+.menu-text {
+  flex: 1;
+  font-size: 30rpx;
+  color: #333;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 40rpx 0;
+}
+
+.version {
+  font-size: 24rpx;
+  color: #c0c4cc;
+}

@@ -1,0 +1,376 @@
+.container {
+  padding: 24rpx;
+  background-color: #f7f8fa;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.page-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+  color: #999;
+}
+
+.retry-btn {
+  margin-top: 20rpx;
+  background-color: #07c160;
+  color: white;
+  font-size: 28rpx;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.info-card .info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+}
+
+.info-card .title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  max-width: 70%;
+}
+
+.info-card .tags {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.tag {
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-size: 22rpx;
+  margin-bottom: 8rpx;
+}
+
+.type-tag {
+  background-color: #eef7ff;
+  color: #3c82f8;
+}
+
+.status-tag {
+  color: #fff;
+}
+.status-ongoing {
+  background-color: #07c160;
+}
+.status-closed {
+  background-color: #999;
+}
+
+.info-card .info-body {
+  font-size: 24rpx;
+  color: #888;
+  display: flex;
+  justify-content: space-between;
+}
+
+.my-result-card {
+  text-align: center;
+}
+.my-result-title {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+.my-result-value {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #07c160;
+}
+
+.my-entry {
+  background-color: #fffbea;
+  border-left: 6rpx solid #ffce3d;
+}
+
+.creator-block {
+  display: flex;
+  align-items: center;
+}
+.creator-avatar {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+}
+.creator-meta .title {
+  font-size: 34rpx;
+  font-weight: bold;
+}
+.creator-name {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+}
+
+.ongoing-view .ongoing-tip {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30rpx;
+}
+.participant-avatars {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin: 8rpx;
+  border: 2rpx solid #eee;
+}
+.avatar-more {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  margin: 8rpx;
+  background-color: #f2f2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 36rpx;
+}
+
+.result-list .result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+.result-list .result-item:last-child {
+  border-bottom: none;
+}
+.participant-info {
+  display: flex;
+  align-items: center;
+}
+.avatar-small {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  margin-right: 20rpx;
+}
+.nickname {
+  font-size: 28rpx;
+  color: #333;
+}
+.result-value-item {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #ff7a45;
+}
+
+.group-section {
+  margin-bottom: 30rpx;
+}
+.group-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #3c82f8;
+  padding: 8rpx 16rpx;
+  background-color: #eef7ff;
+  border-radius: 8rpx;
+  display: inline-block;
+  margin-bottom: 20rpx;
+}
+.group-members {
+  display: flex;
+  flex-wrap: wrap;
+}
+.member-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 20rpx 20rpx 0;
+  width: 120rpx;
+}
+.member-item text {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 8rpx;
+  width: 100%;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.no-participants {
+  text-align: center;
+  color: #999;
+  padding: 40rpx 0;
+}
+
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  gap: 20rpx;
+  background-color: #fff;
+  padding: 20rpx;
+  padding-bottom: calc(20rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
+}
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 12rpx;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+  background-color: #f5f5f5;
+  color: #333;
+}
+.action-btn.primary {
+  background-color: #07c160;
+  color: #fff;
+  font-weight: bold;
+}
+.btn-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 12rpx;
+}
+button::after {
+  border: none;
+}
+
+.winner-option {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #07c160;
+  margin-bottom: 16rpx;
+}
+
+.winner-congrats {
+  font-size: 36rpx;
+  color: #ff6b6b;
+  margin-top: 10rpx;
+}
+
+.status-info {
+  padding: 40rpx 0;
+}
+
+.status-text {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+  line-height: 1.4;
+}
+
+.participants-count {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.participants-card {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+  margin-bottom: 40rpx;
+}
+
+.participants-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.participants-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.participant-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(25% - 15rpx);
+  margin-bottom: 20rpx;
+}
+
+.participant-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 40rpx;
+  overflow: hidden;
+  margin-bottom: 8rpx;
+}
+
+.participant-avatar image {
+  width: 100%;
+  height: 100%;
+}
+
+.participant-name {
+  font-size: 20rpx;
+  color: #666;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.no-participants {
+  width: 100%;
+  text-align: center;
+  padding: 40rpx 0;
+  color: #999;
+  font-size: 24rpx;
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  padding: 0 20rpx;
+}
+
+.share-btn {
+  width: 100%;
+  height: 80rpx;
+  background-color: #07c160;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  border-radius: 40rpx;
+}
+
+.home-btn {
+  width: 100%;
+  height: 60rpx;
+  background-color: #f0f0f0;
+  color: #333;
+  font-size: 28rpx;
+  border-radius: 30rpx;
+}

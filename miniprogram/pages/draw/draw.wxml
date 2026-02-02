@@ -1,0 +1,55 @@
+<view class="container">
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+  
+  <view wx:elif="{{error}}" class="error">
+    <text>{{error}}</text>
+    <button class="retry-btn" bindtap="loadDrawDetail">重试</button>
+  </view>
+  
+  <view wx:else class="draw-info">
+    <view class="draw-card">
+      <view class="draw-header">
+        <view class="creator-block">
+          <image src="{{drawDetail.creatorInfo.avatarUrl || '../../images/avatar.png'}}" class="creator-avatar" mode="aspectFill" />
+          <view class="creator-meta">
+            <text class="draw-title">{{drawDetail.title}}</text>
+            <text class="creator-name">由 {{drawDetail.creatorInfo.nickName || '匿名'}} 创建</text>
+          </view>
+        </view>
+        <text class="status-badge status-{{drawDetail.statusClass}}">{{drawDetail.statusText}}</text>
+      </view>
+
+      <view class="info-body">
+        <text>创建时间：{{formatTime(drawDetail.createTime)}}</text>
+        <text>参与：{{drawDetail.participants.length}} / {{drawDetail.totalCount || drawDetail.options.length}}</text>
+      </view>
+
+      <view class="options-preview">
+        <text class="options-label">抽签选项：</text>
+        <view class="options-list">
+          <view wx:for="{{drawDetail.options}}" wx:key="index" class="option-chip">{{item}}</view>
+        </view>
+      </view>
+
+      <view class="participants">
+        <text class="participants-label">参与者</text>
+        <view class="avatars-grid">
+          <view wx:for="{{drawDetail.participants}}" wx:key="openId" class="avatar-item">
+            <image src="{{item.avatar || '../../images/avatar.png'}}" mode="aspectFill" />
+            <text class="avatar-name">{{item.nickname}}</text>
+            <text wx:if="{{item.openId === wx.getStorageSync('openId')}}" class="my-badge">我</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="action-bar">
+      <view class="action-row">
+        <button class="action-btn primary" bindtap="handleJoinDraw" disabled="{{joined || drawDetail.status !== 0}}">{{joined ? '已参与' : '参与抽签'}}</button>
+        <button class="action-btn" bindtap="goToHistory">查看历史</button>
+      </view>
+    </view>
+  </view>
+</view>

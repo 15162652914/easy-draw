@@ -1,0 +1,77 @@
+<view class="container">
+  
+  <view wx:if="{{loading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+  
+  <view wx:elif="{{error}}" class="error">
+    <text>{{error}}</text>
+    <button class="retry-btn" bindtap="loadDrawDetail">重试</button>
+  </view>
+  
+  <view wx:else class="result-content">
+    <view class="card info-card">
+      <view class="info-header">
+        <view class="creator-block">
+          <image src="{{drawDetail.creatorInfo.avatarUrl || '../../images/avatar.png'}}" class="creator-avatar" />
+          <view class="creator-meta">
+            <text class="title">{{drawDetail.title}}</text>
+            <text class="creator-name">由 {{drawDetail.creatorInfo.nickName || '匿名'}} 创建</text>
+          </view>
+        </view>
+        <view class="tags">
+          <text class="tag type-tag">{{drawDetail.typeText}}</text>
+          <text class="tag status-tag status-{{drawDetail.statusClass}}">{{drawDetail.statusText}}</text>
+        </view>
+      </view>
+      <view class="info-body">
+        <text>时间：{{drawDetail.createTimeFormatted}}</text>
+        <text>参与：{{drawDetail.participantCount || 0}} / {{drawDetail.totalCount}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{hasParticipated && drawDetail.status === 1}}" class="card my-result-card">
+      <view class="my-result-title">我的结果</view>
+      <view class="my-result-value">{{myResult}}</view>
+    </view>
+
+    <view class="card result-list-card">
+      <view class="card-title">抽签详情</view>
+
+      <view wx:if="{{drawDetail.status !== 1}}" class="ongoing-view">
+        <text class="ongoing-tip">抽签进行中，已有 {{drawDetail.participantCount || 0}} 人参与</text>
+      </view>
+
+      <view wx:if="{{drawDetail.type === 'group' && drawDetail.status === 1}}">
+        <view wx:for="{{Object.keys(drawDetail.groupedParticipants)}}" wx:for-item="groupName" wx:key="groupName" class="group-section">
+          <view class="group-name">{{groupName}}</view>
+          <view class="group-members">
+            <view wx:for="{{drawDetail.groupedParticipants[groupName]}}" wx:key="openId" class="member-item">
+              <image src="{{item.avatar}}" class="avatar-small"></image>
+              <text class="member-name">{{item.nickname}}</text>
+              <text class="member-result">{{item.result}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view wx:elif="{{drawDetail.type !== 'group'}}" class="result-list">
+        <view wx:for="{{drawDetail.participants}}" wx:key="openId" class="result-item {{item.openId === openId ? 'my-entry' : ''}}">
+          <view class="participant-info">
+            <image src="{{item.avatar}}" class="avatar-small" />
+            <text class="nickname">{{item.nickname}}</text>
+          </view>
+          <view class="result-value-item">{{item.result}}</view>
+        </view>
+      </view>
+
+      <view wx:if="{{drawDetail.participantCount === 0}}" class="no-participants">还没有人参与</view>
+    </view>
+
+    <view class="action-bar">
+      <button class="action-btn" open-type="share">分享给朋友</button>
+      <button wx:if="{{drawDetail.status === 1}}" class="action-btn" bindtap="copyResult">复制结果</button>
+      <button wx:if="{{!hasParticipated && drawDetail.status !== 1}}" class="action-btn primary" bindtap="goToDraw">立即参与</button>
+    </view>
+  </view>
+</view>

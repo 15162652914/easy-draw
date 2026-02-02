@@ -1,0 +1,48 @@
+<view class="container">
+  <!-- User Info -->
+  <view class="user-info-card" bindtap="{{!userInfo ? 'login' : ''}}">
+    <image class="avatar" src="{{userInfo.avatarUrl || '/images/icons/avatar.png'}}" mode="aspectFill" />
+    <view class="user-details">
+      <text class="nickname">{{userInfo.nickName || '点击登录'}}</text>
+      <text class="login-tip">{{userInfo ? '欢迎回来' : '登录以同步数据'}}</text>
+    </view>
+    <image wx:if="{{userInfo}}" class="arrow-icon" src="/images/icons/arrow-right.png" />
+  </view>
+  
+  <!-- Menu -->
+  <view class="menu-section">
+    <view class="menu-item" bindtap="viewHistory">
+      <image class="menu-icon" src="/images/icons/history.png" />
+      <text class="menu-text">我的抽签</text>
+      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+    </view>
+  </view>
+
+  <view class="menu-section">
+    <!-- <button class="menu-item" open-type="feedback">
+      <image class="menu-icon" src="/images/icons/feedback.png" />
+      <text class="menu-text">意见反馈</text>
+      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+    </button>
+    <button class="menu-item" open-type="contact">
+      <image class="menu-icon" src="/images/icons/contact.png" />
+      <text class="menu-text">联系客服</text>
+      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+    </button> -->
+    <view class="menu-item" bindtap="showAbout">
+      <image class="menu-icon" src="/images/icons/about.png" />
+      <text class="menu-text">关于我们</text>
+      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+    </view>
+    <view class="menu-item" bindtap="showPrivacyPolicy">
+      <image class="menu-icon" src="/images/icons/privacy.png" />
+      <text class="menu-text">隐私协议</text>
+      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+    </view>
+  </view>
+
+  <!-- Footer -->
+  <view class="footer">
+    <text class="version">Version 1.2.0</text>
+  </view>
+</view>

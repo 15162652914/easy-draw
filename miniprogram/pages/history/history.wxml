@@ -1,0 +1,75 @@
+<view class="container">
+  <view class="tab-bar">
+    <view 
+      class="tab-item {{activeTab === 'participated' ? 'active' : ''}}" 
+      bindtap="switchTab"
+      data-tab="participated"
+    >
+      我参与的
+    </view>
+    <view 
+      class="tab-item {{activeTab === 'created' ? 'active' : ''}}" 
+      bindtap="switchTab"
+      data-tab="created"
+    >
+      我创建的
+    </view>
+  </view>
+  
+  <!-- Loading Skeleton -->
+  <view wx:if="{{loading && draws.length === 0}}" class="skeleton-list">
+    <view class="skeleton-card" wx:for="{{[1, 2, 3]}}" wx:key="item"></view>
+  </view>
+  
+  <view wx:elif="{{error}}" class="empty-container">
+    <image class="empty-icon" src="/images/icons/error.png" />
+    <text class="empty-text">{{error}}</text>
+    <button class="retry-btn" bindtap="loadHistory" data-refresh="{{true}}">点击重试</button>
+  </view>
+  
+  <view wx:elif="{{draws.length === 0}}" class="empty-container">
+    <image class="empty-icon" src="/images/icons/empty.png" />
+    <text class="empty-text">暂无{{activeTab === 'participated' ? '参与的' : '创建的'}}抽签记录</text>
+    <button class="create-btn" bindtap="goToCreate">去创建</button>
+  </view>
+  
+  <view wx:else class="draws-list">
+    <view 
+      wx:for="{{draws}}" 
+      wx:key="_id" 
+      class="draw-card"
+      bindtap="viewDrawDetail"
+      data-drawid="{{item._id}}"
+    >
+      <view class="draw-header">
+        <text class="draw-title">{{item.title}}</text>
+        <view class="draw-status {{item.statusClass}}">{{item.statusText}}</view>
+      </view>
+      
+      <view class="draw-body">
+        <view class="info-line">
+          <image class="info-icon" src="/images/icons/user.png" />
+          <text class="info-text">创建者: {{item.participants[0].nickname}}</text>
+        </view>
+        <view class="info-line">
+          <image class="info-icon" src="/images/icons/time.png" />
+          <text class="info-text">时间: {{item.createTimeFormatted}}</text>
+        </view>
+        <view wx:if="{{activeTab === 'participated' && item.hasParticipated}}" class="info-line my-result">
+          <image class="info-icon" src="/images/icons/gift.png" />
+          <text class="info-text">我的结果: </text>
+          <text class="result-value">{{item.myResult}}</text>
+        </view>
+      </view>
+      
+      <view class="draw-footer">
+        <text class="draw-participants">
+          <text class="count">{{item.participantCount}}</text> / {{item.totalCount}} 人参与
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading && draws.length > 0}}" class="loading-more">加载中...</view>
+  <view wx:if="{{!hasMore && draws.length > 0}}" class="no-more">没有更多了</view>
+</view>
