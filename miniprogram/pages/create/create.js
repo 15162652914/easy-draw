@@ -12,8 +12,16 @@ Page({
     maxParticipants: '',
     // 抽签方式，使用数值枚举
     type: DRAW_TYPE.SEQUENCE,
-    drawTypeTextMap: DRAW_TYPE_TEXT
+    drawTypeTextMap: DRAW_TYPE_TEXT,
+    // 用于渲染的抽签方式数组（用于 wx:for）
+    typeOptions: [
+      { value: DRAW_TYPE.NORMAL, label: '普通抽签' },
+      { value: DRAW_TYPE.SEQUENCE, label: '顺序抽签' },
+      { value: DRAW_TYPE.RANDOM, label: '随机抽选' },
+      { value: DRAW_TYPE.GROUP, label: '分组抽签' }
+    ]
   },
+
 
   onLoad(options) {
     this.initData(options)
@@ -99,6 +107,12 @@ Page({
     // radio 的 value 传回为字符串，转换为数字枚举
     const val = e.detail.value
     const n = parseInt(val, 10)
+    if (!isNaN(n)) this.setData({ type: n })
+  },
+
+  onTypeSelect(e) {
+    const v = e.currentTarget.dataset.value
+    const n = typeof v === 'string' ? parseInt(v, 10) : v
     if (!isNaN(n)) this.setData({ type: n })
   },
 

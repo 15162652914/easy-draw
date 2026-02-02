@@ -180,3 +180,53 @@
   border-color: transparent;
   pointer-events: none;
 }
+
+/* 抽签方式选择样式 */
+.type-group {
+  display: flex;
+  flex-wrap: nowrap; /* 强制单行 */
+  gap: 12rpx;
+  padding: 6rpx 0 0 0;
+  overflow-x: auto; /* 当屏幕太窄时允许横向滚动 */
+}
+.type-item {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 12rpx;
+  border-radius: 24rpx;
+  border: 1rpx solid #eef0f3;
+  background-color: #fff;
+  box-shadow: 0 1rpx 4rpx rgba(0,0,0,0.02);
+  min-width: 140rpx;
+}
+.type-item:active { background-color: #fafbfd; }
+.circle {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  border: 1rpx solid #dfe6ea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+}
+.circle .check { color: #2ecc71; font-size: 20rpx; }
+.check-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+.type-label {
+  margin-left: 10rpx;
+  font-size: 24rpx;
+  color: #333;
+}
+.type-item.selected {
+  border-color: #2ecc71;
+  background-color: #f5fff5;
+}
+.type-item.selected .circle {
+  background-color: #2ecc71;
+  border-color: #2ecc71;
+}
+.type-item.selected .circle .check { color: #fff; font-weight: 700; }
+.type-item.selected .type-label { color: #2ecc71; font-weight: 700; }
