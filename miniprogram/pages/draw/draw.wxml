@@ -23,7 +23,7 @@
 
       <view class="info-body">
         <text>创建时间：{{formatTime(drawDetail.createTime)}}</text>
-        <text>参与：{{drawDetail.participants.length}} / {{drawDetail.totalCount || drawDetail.options.length}}</text>
+        <text>参与：{{drawDetail.participants.length}} / {{drawDetail.maxParticipants || drawDetail.totalCount || drawDetail.options.length}}</text>
       </view>
 
       <view class="options-preview">
@@ -39,6 +39,7 @@
           <view wx:for="{{drawDetail.participants}}" wx:key="openId" class="avatar-item">
             <image src="{{item.avatar || '../../images/avatar.png'}}" mode="aspectFill" />
             <text class="avatar-name">{{item.nickname}}</text>
+            <text class="avatar-result">{{item.resultText || item.result}}</text>
             <text wx:if="{{item.openId === wx.getStorageSync('openId')}}" class="my-badge">我</text>
           </view>
         </view>
@@ -47,8 +48,9 @@
 
     <view class="action-bar">
       <view class="action-row">
-        <button class="action-btn primary" bindtap="handleJoinDraw" disabled="{{joined || drawDetail.status !== 0}}">{{joined ? '已参与' : '参与抽签'}}</button>
-        <button class="action-btn" bindtap="goToHistory">查看历史</button>
+        <view class="action-btn primary {{joined || drawDetail.status !== 0 ? 'disabled' : ''}}" bindtap="handleJoinDraw">{{joined ? '已参与' : '参与抽签'}}</view>
+        <view class="action-btn" bindtap="goToHistory">查看历史</view>
+        <view wx:if="{{isCreator && drawDetail.status === 0}}" class="action-btn danger" bindtap="handleCloseDraw">结束抽签</view>
       </view>
     </view>
   </view>

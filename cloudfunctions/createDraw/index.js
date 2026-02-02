@@ -4,7 +4,7 @@ const db = cloud.database();
 const _ = db.command;
 
 exports.main = async (event, context) => {
-  const { title, type, options, totalCount, groupId } = event;
+  const { title, type, options, totalCount, groupId, maxParticipants } = event;
   const wxContext = cloud.getWXContext();
   const openId = wxContext.OPENID;
   
@@ -28,6 +28,8 @@ exports.main = async (event, context) => {
         options: options || [],
         totalCount: totalCount || 10,
         lotsPool: lotsPool, // 预生成的签池，已被抽的设为null
+        // 新增：最大参与人数（可选）。未设置则按 totalCount 或 options 长度限制。
+        maxParticipants: typeof maxParticipants === 'number' && maxParticipants > 0 ? maxParticipants : null,
         status: 0, // 0 = ongoing
         participants: [],
         groupId: groupId || '',

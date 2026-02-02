@@ -26,20 +26,21 @@
       </view>
       <view class="info-body">
         <text>时间：{{drawDetail.createTimeFormatted}}</text>
-        <text>参与：{{drawDetail.participantCount || 0}} / {{drawDetail.totalCount}}</text>
+        <text>参与：{{drawDetail.participantCount}} / {{drawDetail.upperLimit}}</text>
       </view>
     </view>
 
-    <view wx:if="{{hasParticipated && drawDetail.status === 1}}" class="card my-result-card">
+    <view wx:if="{{hasParticipated}}" class="card my-result-card">
       <view class="my-result-title">我的结果</view>
-      <view class="my-result-value">{{myResult}}</view>
+      <view class="my-result-value">{{myResultText || myResult}}</view>
+      <text wx:if="{{drawDetail.status !== 1}}" class="my-result-subtip">抽签进行中</text>
     </view>
 
     <view class="card result-list-card">
       <view class="card-title">抽签详情</view>
 
       <view wx:if="{{drawDetail.status !== 1}}" class="ongoing-view">
-        <text class="ongoing-tip">抽签进行中，已有 {{drawDetail.participantCount || 0}} 人参与</text>
+        <text class="ongoing-tip">抽签进行中，已有 {{drawDetail.participantCount}} 人参与{{drawDetail.upperLimit ? (' / 上限 ' + drawDetail.upperLimit) : ''}}</text>
       </view>
 
       <view wx:if="{{drawDetail.type === 'group' && drawDetail.status === 1}}">
@@ -61,17 +62,18 @@
             <image src="{{item.avatar}}" class="avatar-small" />
             <text class="nickname">{{item.nickname}}</text>
           </view>
-          <view class="result-value-item">{{item.result}}</view>
+          <view class="result-value-item">{{item.resultText || item.result}}</view>
         </view>
       </view>
 
       <view wx:if="{{drawDetail.participantCount === 0}}" class="no-participants">还没有人参与</view>
     </view>
 
-    <view class="action-bar">
-      <button class="action-btn" open-type="share">分享给朋友</button>
-      <button wx:if="{{drawDetail.status === 1}}" class="action-btn" bindtap="copyResult">复制结果</button>
-      <button wx:if="{{!hasParticipated && drawDetail.status !== 1}}" class="action-btn primary" bindtap="goToDraw">立即参与</button>
-    </view>
+      <view class="action-bar">
+        <button class="action-btn primary" open-type="share">分享给朋友</button>
+        <view wx:if="{{drawDetail.status === 1}}" class="action-btn" bindtap="copyResult">复制结果</view>
+        <view wx:if="{{!hasParticipated && drawDetail.status === 0}}" class="action-btn primary" bindtap="goToDraw">立即参与</view>
+        <view wx:if="{{isCreator && drawDetail.status !== 1}}" class="action-btn danger" bindtap="handleCloseDraw">结束抽签</view>
+      </view>
   </view>
 </view>

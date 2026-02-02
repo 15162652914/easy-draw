@@ -1,4 +1,4 @@
-const { getDrawDetail, joinDraw } = require('../../utils/db')
+const { getDrawDetail, joinDraw, closeDraw } = require('../../utils/db')
 const { DRAW_STATUS, DRAW_STATUS_TEXT } = require('../../utils/constants')
 
 Page({
@@ -8,7 +8,8 @@ Page({
     loading: true,
     error: '',
     joined: false,
-    userInfo: null
+    userInfo: null,
+    isCreator: false
   },
 
   onLoad(options) {
@@ -66,10 +67,18 @@ Page({
         result.data.status = typeof statusVal === 'number' ? statusVal : 0
         result.data.statusText = DRAW_STATUS_TEXT[result.data.status] || ''
         result.data.statusClass = result.data.status === DRAW_STATUS.ONGOING ? 'ongoing' : 'closed'
+        // 附加每位参与者的文本结果（按选项映射）
+        if (Array.isArray(result.data.participants)) {
+          result.data.participants = result.data.participants.map(p => ({
+            ...p,
+            resultText: this.resolveResultText(result.data, p.result)
+          }))
+        }
 
         this.setData({
           drawDetail: result.data,
           joined: !!joined,
+          isCreator: result.data._openid === currentOpenId,
           loading: false
         })
       } else {
@@ -81,8 +90,45 @@ Page({
     }
   },
 
+  async handleCloseDraw() {
+    const { drawId, isCreator, drawDetail } = this.data
+    if (!isCreator) {
+      wx.showToast({ title: '仅创建者可终止', icon: 'none' })
+      return
+    }
+    if (drawDetail?.status !== DRAW_STATUS.ONGOING) {
+      wx.showToast({ title: '当前不可终止', icon: 'none' })
+      return
+    }
+    wx.showModal({
+      title: '终止抽签',
+      content: '终止后将不可继续参与，是否确认？',
+      success: async (res) => {
+        if (!res.confirm) return
+        wx.showLoading({ title: '终止中...' })
+        try {
+          const result = await closeDraw({ drawId })
+          wx.hideLoading()
+          if (result.success) {
+            wx.showToast({ title: '已终止', icon: 'success' })
+            this.loadDrawDetail()
+          } else {
+            wx.showToast({ title: result.message || '终止失败', icon: 'none' })
+          }
+        } catch (e) {
+          wx.hideLoading()
+          wx.showToast({ title: '终止失败，请重试', icon: 'none' })
+        }
+      }
+    })
+  },
+
   async handleJoinDraw() {
-    const { drawId, userInfo, drawDetail } = this.data
+    const { drawId, userInfo, drawDetail, joined } = this.data
+    if (joined) {
+      wx.showToast({ title: '已参与', icon: 'none' })
+      return
+    }
     
     if (!userInfo) {
       wx.showToast({ title: '请先授权获取用户信息', icon: 'none' })
@@ -124,13 +170,19 @@ Page({
           nickname: userInfo.nickName,
           avatar: userInfo.avatarUrl,
           result: result.data?.result ?? null,
+          resultText: this.resolveResultText(updatedDetail, result.data?.result ?? null),
           drawTime: Date.now()
         }
 
         const updatedDetail = Object.assign({}, drawDetail)
         updatedDetail.participants = updatedDetail.participants ? [...updatedDetail.participants, participant] : [participant]
-        // 如果参与人数已满，更新状态为 FULL
-        if (updatedDetail.participants.length >= (updatedDetail.totalCount || updatedDetail.options?.length || 0)) {
+        // 如果参与人数已满，更新状态为 FULL（优先使用 maxParticipants）
+        const upperLimit = (typeof updatedDetail.maxParticipants === 'number' && updatedDetail.maxParticipants > 0)
+          ? updatedDetail.maxParticipants
+          : (typeof updatedDetail.totalCount === 'number' && updatedDetail.totalCount > 0)
+            ? updatedDetail.totalCount
+            : (updatedDetail.options?.length || 0)
+        if (upperLimit > 0 && updatedDetail.participants.length >= upperLimit) {
           updatedDetail.status = DRAW_STATUS.FULL
           updatedDetail.statusText = DRAW_STATUS_TEXT[DRAW_STATUS.FULL]
           updatedDetail.statusClass = 'closed'
@@ -153,6 +205,18 @@ Page({
       wx.showToast({ title: '参与失败，请重试', icon: 'none' })
       console.error('参与抽签失败:', error)
     }
+  },
+
+  // 将结果值映射为选项文本（数字视为 1-based 索引）
+  resolveResultText(draw, result) {
+    if (result === null || result === undefined) return ''
+    const opts = Array.isArray(draw.options) ? draw.options : []
+    const n = typeof result === 'number' ? result : parseInt(result, 10)
+    if (!isNaN(n)) {
+      const idx = n - 1
+      if (idx >= 0 && idx < opts.length) return String(opts[idx])
+    }
+    return String(result)
   },
 
   goToHistory() {

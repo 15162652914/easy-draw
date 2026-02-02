@@ -115,3 +115,20 @@ export const getOpenId = async () => {
     }
   }
 }
+
+// 手动终止抽签（仅创建者）
+export const closeDraw = async (data) => {
+  try {
+    const result = await wx.cloud.callFunction({
+      name: 'closeDraw',
+      data: data
+    })
+    return result.result
+  } catch (error) {
+    console.error('终止抽签失败:', error)
+    return {
+      success: false,
+      message: '网络错误，请重试'
+    }
+  }
+}

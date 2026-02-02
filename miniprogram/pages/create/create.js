@@ -7,7 +7,8 @@ Page({
     options: [],
     expireDate: '',
     today: '',
-    userInfo: null
+    userInfo: null,
+    maxParticipants: ''
   },
 
   onLoad(options) {
@@ -73,6 +74,23 @@ Page({
     this.setData({ title: e.detail.value })
   },
 
+  onMaxParticipantsChange(e) {
+    // 仅允许正整数，空值表示不限制
+    const raw = String(e.detail.value || '').trim()
+    if (!raw) {
+      this.setData({ maxParticipants: '' })
+      return
+    }
+    const val = parseInt(raw, 10)
+    if (isNaN(val) || val <= 0) {
+      wx.showToast({ title: '请输入大于0的数字', icon: 'none' })
+      return
+    }
+    // 简单上限保护，避免异常过大值
+    const capped = Math.min(val, 100000)
+    this.setData({ maxParticipants: String(capped) })
+  },
+
   onOptionChange(e) {
     const { index } = e.currentTarget.dataset
     const value = e.detail.value
@@ -106,7 +124,7 @@ Page({
   },
 
   async createDraw() {
-    const { title, options, expireDate, userInfo } = this.data
+    const { title, options, expireDate, userInfo, maxParticipants } = this.data
     
     // 验证表单
     if (!title) {
@@ -142,7 +160,9 @@ Page({
           nickName: userInfo.nickName,
           avatarUrl: userInfo.avatarUrl
         },
-        expireTime: expireDate ? new Date(expireDate).getTime() : null
+        expireTime: expireDate ? new Date(expireDate).getTime() : null,
+        // 传递最大参与人数（可选）
+        maxParticipants: maxParticipants ? parseInt(maxParticipants, 10) : undefined
       })
       
       wx.hideLoading()

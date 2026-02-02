@@ -1,4 +1,4 @@
-const { getUserDraws, getCreatorDraws } = require('../../utils/db')
+const { getUserDraws, getCreatorDraws, closeDraw } = require('../../utils/db')
 const { DRAW_STATUS, DRAW_STATUS_TEXT } = require('../../utils/constants')
 
 const PAGE_SIZE = 10
@@ -107,11 +107,23 @@ Page({
             // map to display classes used in history.wxss: active / completed
           const displayClass = statusVal === DRAW_STATUS.ONGOING ? 'active' : 'completed'
 
+          const myResultVal = myParticipation?.result
+          const myResultText = this.resolveResultText(draw, myResultVal)
+          const upperLimit = (typeof draw.maxParticipants === 'number' && draw.maxParticipants > 0)
+            ? draw.maxParticipants
+            : (typeof draw.totalCount === 'number' && draw.totalCount > 0)
+              ? draw.totalCount
+              : Array.isArray(draw.options)
+                ? draw.options.length
+                : 0
+
           return {
             ...draw,
             participantCount: draw.participants?.length || 0,
             totalCount: draw.totalCount || draw.options?.length || 0,
-            myResult: myParticipation?.result ?? '未参与',
+            upperLimit: upperLimit,
+            myResult: myResultVal ?? '未参与',
+            myResultText: myResultText || '',
             hasParticipated: !!myParticipation,
             statusText: DRAW_STATUS_TEXT[statusVal] || '',
             statusClass: displayClass,
@@ -142,6 +154,18 @@ Page({
     }
   },
 
+  // 将结果值映射为选项文本（数字视为 1-based 索引）
+  resolveResultText(draw, result) {
+    if (result === null || result === undefined) return ''
+    const opts = Array.isArray(draw.options) ? draw.options : []
+    const n = typeof result === 'number' ? result : parseInt(result, 10)
+    if (!isNaN(n)) {
+      const idx = n - 1
+      if (idx >= 0 && idx < opts.length) return String(opts[idx])
+    }
+    return String(result)
+  },
+
   // 获取抽签类型文本
   getTypeText(type) {
     const typeMap = {
@@ -156,6 +180,31 @@ Page({
     const { drawid } = e.currentTarget.dataset
     wx.navigateTo({
       url: `/pages/result/result?drawId=${drawid}`
+    })
+  },
+
+  async closeFromHistory(e) {
+    const { drawid } = e.currentTarget.dataset
+    wx.showModal({
+      title: '终止抽签',
+      content: '终止后将不可继续参与，是否确认？',
+      success: async (res) => {
+        if (!res.confirm) return
+        wx.showLoading({ title: '终止中...' })
+        try {
+          const result = await closeDraw({ drawId: drawid })
+          wx.hideLoading()
+          if (result.success) {
+            wx.showToast({ title: '已终止', icon: 'success' })
+            this.loadHistory(true)
+          } else {
+            wx.showToast({ title: result.message || '终止失败', icon: 'none' })
+          }
+        } catch (e) {
+          wx.hideLoading()
+          wx.showToast({ title: '终止失败，请重试', icon: 'none' })
+        }
+      }
     })
   },
 

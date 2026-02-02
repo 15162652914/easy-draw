@@ -34,7 +34,15 @@ exports.main = async (event, context) => {
     if (draw.data.status === 1) {
       return { success: false, data: {}, message: '抽签已结束' };
     }
-    if (participants.length >= draw.data.totalCount) {
+    // 参与人数上限优先：maxParticipants > totalCount > options.length
+    const upperLimit = (typeof draw.data.maxParticipants === 'number' && draw.data.maxParticipants > 0)
+      ? draw.data.maxParticipants
+      : (typeof draw.data.totalCount === 'number' && draw.data.totalCount > 0)
+        ? draw.data.totalCount
+        : Array.isArray(draw.data.options)
+          ? draw.data.options.length
+          : 0;
+    if (upperLimit > 0 && participants.length >= upperLimit) {
       // 可选：将状态更新为已满
       await db.collection('draws').doc(drawId).update({ data: { status: 2, updateTime: db.serverDate() } });
       return { success: false, data: {}, message: '名额已满' };

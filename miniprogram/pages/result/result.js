@@ -1,4 +1,4 @@
-const { getDrawDetail } = require('../../utils/db')
+const { getDrawDetail, closeDraw } = require('../../utils/db')
 const { formatTime } = require('../../utils/util')
 const { DRAW_STATUS, DRAW_STATUS_TEXT } = require('../../utils/constants')
 
@@ -11,6 +11,7 @@ Page({
     isCreator: false,
     hasParticipated: false,
     myResult: null,
+    myResultText: '',
     groupedParticipants: {},
     openId: ''
   },
@@ -52,12 +53,15 @@ Page({
         const myParticipation = detail.participants?.find(p => p.openId === openId)
 
         const processedDetail = this.processDrawData(detail, openId)
+        const myResultVal = myParticipation?.result ?? null
+        const myResultText = this.resolveResultText(processedDetail, myResultVal)
 
         this.setData({
           drawDetail: processedDetail,
           isCreator: detail._openid === openId,
           hasParticipated: !!myParticipation,
-          myResult: myParticipation?.result ?? null,
+          myResult: myResultVal,
+          myResultText: myResultText,
           loading: false
         })
       } else {
@@ -91,9 +95,20 @@ Page({
     draw.statusText = DRAW_STATUS_TEXT[draw.status] || ''
     draw.statusClass = draw.status === DRAW_STATUS.ONGOING ? 'ongoing' : 'closed'
 
+    // 参与人数与上限展示：优先使用 maxParticipants，其次 totalCount，最后 options.length
+    draw.participantCount = Array.isArray(draw.participants) ? draw.participants.length : 0
+    draw.upperLimit = (typeof draw.maxParticipants === 'number' && draw.maxParticipants > 0)
+      ? draw.maxParticipants
+      : (typeof draw.totalCount === 'number' && draw.totalCount > 0)
+        ? draw.totalCount
+        : Array.isArray(draw.options)
+          ? draw.options.length
+          : 0
+
     if (draw.participants) {
       draw.participants.forEach(p => {
         p.drawTimeFormatted = formatTime(p.drawTime)
+        p.resultText = this.resolveResultText(draw, p.result)
       })
     }
 
@@ -110,6 +125,19 @@ Page({
     return draw
   },
 
+  resolveResultText(draw, result) {
+    if (result === null || result === undefined) return ''
+    const opts = Array.isArray(draw.options) ? draw.options : []
+    // 结果为数字（或数字字符串）时，尝试映射到选项文本（1-based）
+    const n = typeof result === 'number' ? result : parseInt(result, 10)
+    if (!isNaN(n)) {
+      const idx = n - 1
+      if (idx >= 0 && idx < opts.length) return String(opts[idx])
+    }
+    // 其他情况，直接作为字符串展示
+    return String(result)
+  },
+
   onShareAppMessage() {
     const { drawId, drawDetail } = this.data
     const title = drawDetail?.title ? `邀请你参与抽签：${drawDetail.title}` : '快来参与这个好玩的抽签'
@@ -120,6 +148,40 @@ Page({
       path: path,
       imageUrl: ''
     }
+  },
+
+  async handleCloseDraw() {
+    const { drawId, isCreator, drawDetail } = this.data
+    if (!isCreator) {
+      wx.showToast({ title: '仅创建者可终止', icon: 'none' })
+      return
+    }
+    if (drawDetail?.status === DRAW_STATUS.CLOSED) {
+      wx.showToast({ title: '抽签已结束', icon: 'none' })
+      return
+    }
+    wx.showModal({
+      title: '终止抽签',
+      content: '终止后将不可继续参与，是否确认？',
+      success: async (res) => {
+        if (!res.confirm) return
+        wx.showLoading({ title: '终止中...' })
+        try {
+          const result = await closeDraw({ drawId })
+          wx.hideLoading()
+          if (result.success) {
+            wx.showToast({ title: '已终止', icon: 'success' })
+            // 刷新详情
+            this.loadDrawDetail()
+          } else {
+            wx.showToast({ title: result.message || '终止失败', icon: 'none' })
+          }
+        } catch (e) {
+          wx.hideLoading()
+          wx.showToast({ title: '终止失败，请重试', icon: 'none' })
+        }
+      }
+    })
   },
 
   onShareTimeline() {
@@ -139,7 +201,8 @@ Page({
     }
 
     let resultText = `抽签主题：${drawDetail.title}\n`
-    resultText += `参与人数：${drawDetail.participants.length}\n`
+    const upper = drawDetail.upperLimit || drawDetail.totalCount || (drawDetail.options?.length || 0)
+    resultText += `参与人数：${drawDetail.participants.length}${upper ? ' / ' + upper : ''}\n`
     resultText += '-------------------\n'
 
     if (drawDetail.type === 'group') {
@@ -150,7 +213,8 @@ Page({
       }
     } else {
       drawDetail.participants.forEach(p => {
-        resultText += `${p.nickname} -> ${p.result}\n`
+        const value = p.resultText || p.result
+        resultText += `${p.nickname} -> ${value}\n`
       })
     }
 

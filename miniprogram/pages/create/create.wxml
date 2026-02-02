@@ -51,6 +51,22 @@
   <view class="card">
     <view class="form-item">
       <view class="label-wrapper">
+        <text class="icon">👥</text>
+        <text class="label">最大参与人数</text>
+      </view>
+      <input
+        class="input"
+        type="number"
+        placeholder="不限制（留空）"
+        value="{{maxParticipants}}"
+        bindinput="onMaxParticipantsChange"
+      />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="form-item">
+      <view class="label-wrapper">
         <text class="icon">⏰</text>
         <text class="label">过期时间</text>
       </view>
