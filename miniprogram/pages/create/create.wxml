@@ -84,14 +84,14 @@
   
   <view class="footer">
     <button
-      class="save-template-btn"
+      class="save-template-btn {{(!title || options.length < 1) ? 'disabled' : ''}}"
       bindtap="saveTemplate"
       disabled="{{!title || options.length < 1}}"
     >
       保存为模板
     </button>
     <button 
-      class="create-btn" 
+      class="create-btn {{(!title || options.length < 2) ? 'disabled' : ''}}" 
       bindtap="createDraw"
       disabled="{{!title || options.length < 2}}"
     >

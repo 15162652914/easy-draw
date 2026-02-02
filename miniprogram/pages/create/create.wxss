@@ -171,7 +171,7 @@
   box-shadow: 0 4rpx 12rpx rgba(118, 75, 162, 0.2);
 }
 
-.save-template-btn[disabled], .create-btn[disabled] {
+.save-template-btn.disabled, .create-btn.disabled {
   opacity: 0.5;
   box-shadow: none;
   background-image: none; /* 禁用状态下移除渐变 */

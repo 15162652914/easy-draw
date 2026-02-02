@@ -110,7 +110,7 @@
 .terminate-btn:active {
   opacity: 0.85;
 }
-.terminate-btn[disabled] {
+.terminate-btn.disabled {
   background: #f0f0f0;
   color: #bbb;
   box-shadow: none;
