@@ -9,7 +9,9 @@ Page({
     error: '',
     joined: false,
     userInfo: null,
-    isCreator: false
+    isCreator: false,
+    joining: false,
+    closing: false
   },
 
   onLoad(options) {
@@ -91,7 +93,8 @@ Page({
   },
 
   async handleCloseDraw() {
-    const { drawId, isCreator, drawDetail } = this.data
+    const { drawId, isCreator, drawDetail, closing } = this.data
+    if (closing) return
     if (!isCreator) {
       wx.showToast({ title: '仅创建者可终止', icon: 'none' })
       return
@@ -105,10 +108,10 @@ Page({
       content: '终止后将不可继续参与，是否确认？',
       success: async (res) => {
         if (!res.confirm) return
+        this.setData({ closing: true })
         wx.showLoading({ title: '终止中...' })
         try {
           const result = await closeDraw({ drawId })
-          wx.hideLoading()
           if (result.success) {
             wx.showToast({ title: '已终止', icon: 'success' })
             this.loadDrawDetail()
@@ -116,19 +119,22 @@ Page({
             wx.showToast({ title: result.message || '终止失败', icon: 'none' })
           }
         } catch (e) {
-          wx.hideLoading()
           wx.showToast({ title: '终止失败，请重试', icon: 'none' })
+        } finally {
+          wx.hideLoading()
+          this.setData({ closing: false })
         }
       }
     })
   },
 
   async handleJoinDraw() {
-    const { drawId, userInfo, drawDetail, joined } = this.data
+    const { drawId, userInfo, drawDetail, joined, joining } = this.data
     if (joined) {
       wx.showToast({ title: '已参与', icon: 'none' })
       return
     }
+    if (joining) return
     
     if (!userInfo) {
       wx.showToast({ title: '请先授权获取用户信息', icon: 'none' })
@@ -140,6 +146,7 @@ Page({
       return
     }
     
+    this.setData({ joining: true })
     wx.showLoading({ title: '参与中...' })
     
     try {
@@ -149,9 +156,8 @@ Page({
         avatar: userInfo.avatarUrl
       })
       
-      wx.hideLoading()
-      
       if (result.success) {
+        wx.hideLoading()
         // 如果云函数返回已参与情况，直接跳转并标记已参与
         if (result.data?.hasJoined) {
           this.setData({ joined: true })
@@ -159,6 +165,7 @@ Page({
           setTimeout(() => {
             wx.navigateTo({ url: `/pages/result/result?drawId=${drawId}` })
           }, 700)
+          this.setData({ joining: false })
           return
         }
 
@@ -197,12 +204,15 @@ Page({
           wx.navigateTo({ url: `/pages/result/result?drawId=${drawId}` })
         }, 800)
       } else {
+        wx.hideLoading()
         wx.showToast({ title: result.message, icon: 'none' })
       }
     } catch (error) {
-      wx.hideLoading()
       wx.showToast({ title: '参与失败，请重试', icon: 'none' })
       console.error('参与抽签失败:', error)
+    } finally {
+      wx.hideLoading()
+      this.setData({ joining: false })
     }
   },
 

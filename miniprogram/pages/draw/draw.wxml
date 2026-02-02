@@ -48,9 +48,9 @@
 
     <view class="action-bar">
       <view class="action-row">
-        <view class="action-btn primary {{joined || drawDetail.status !== 0 ? 'disabled' : ''}}" bindtap="handleJoinDraw">{{joined ? '已参与' : '参与抽签'}}</view>
+        <view class="action-btn primary {{(joined || drawDetail.status !== 0 || joining) ? 'disabled' : ''}}" bindtap="handleJoinDraw">{{joined ? '已参与' : (joining ? '参与中…' : '参与抽签')}}</view>
         <view class="action-btn" bindtap="goToHistory">查看历史</view>
-        <view wx:if="{{isCreator && drawDetail.status === 0}}" class="action-btn danger" bindtap="handleCloseDraw">结束抽签</view>
+        <view wx:if="{{isCreator && drawDetail.status === 0}}" class="action-btn danger {{closing ? 'disabled' : ''}}" bindtap="handleCloseDraw">{{closing ? '结束中…' : '结束抽签'}}</view>
       </view>
     </view>
   </view>

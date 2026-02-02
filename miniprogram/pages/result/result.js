@@ -13,7 +13,8 @@ Page({
     myResult: null,
     myResultText: '',
     groupedParticipants: {},
-    openId: ''
+    openId: '',
+    closing: false
   },
 
   onLoad(options) {
@@ -151,7 +152,8 @@ Page({
   },
 
   async handleCloseDraw() {
-    const { drawId, isCreator, drawDetail } = this.data
+    const { drawId, isCreator, drawDetail, closing } = this.data
+    if (closing) return
     if (!isCreator) {
       wx.showToast({ title: '仅创建者可终止', icon: 'none' })
       return
@@ -165,10 +167,10 @@ Page({
       content: '终止后将不可继续参与，是否确认？',
       success: async (res) => {
         if (!res.confirm) return
+        this.setData({ closing: true })
         wx.showLoading({ title: '终止中...' })
         try {
           const result = await closeDraw({ drawId })
-          wx.hideLoading()
           if (result.success) {
             wx.showToast({ title: '已终止', icon: 'success' })
             // 刷新详情
@@ -177,8 +179,10 @@ Page({
             wx.showToast({ title: result.message || '终止失败', icon: 'none' })
           }
         } catch (e) {
-          wx.hideLoading()
           wx.showToast({ title: '终止失败，请重试', icon: 'none' })
+        } finally {
+          wx.hideLoading()
+          this.setData({ closing: false })
         }
       }
     })

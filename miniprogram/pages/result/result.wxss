@@ -272,6 +272,10 @@
 .action-btn.danger:active {
   opacity: 0.85;
 }
+.action-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 .btn-icon {
   width: 32rpx;
   height: 32rpx;

@@ -73,7 +73,7 @@
         <button class="action-btn primary" open-type="share">分享给朋友</button>
         <view wx:if="{{drawDetail.status === 1}}" class="action-btn" bindtap="copyResult">复制结果</view>
         <view wx:if="{{!hasParticipated && drawDetail.status === 0}}" class="action-btn primary" bindtap="goToDraw">立即参与</view>
-        <view wx:if="{{isCreator && drawDetail.status !== 1}}" class="action-btn danger" bindtap="handleCloseDraw">结束抽签</view>
+        <view wx:if="{{isCreator && drawDetail.status !== 1}}" class="action-btn danger {{closing ? 'disabled' : ''}}" bindtap="handleCloseDraw">{{closing ? '结束中…' : '结束抽签'}}</view>
       </view>
   </view>
 </view>
