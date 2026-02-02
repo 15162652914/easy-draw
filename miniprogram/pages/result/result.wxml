@@ -6,7 +6,7 @@
   
   <view wx:elif="{{error}}" class="error">
     <text>{{error}}</text>
-    <button class="retry-btn" bindtap="loadDrawDetail">重试</button>
+    <view class="retry-btn" bindtap="loadDrawDetail">重试</view>
   </view>
   
   <view wx:else class="result-content">
@@ -70,7 +70,7 @@
     </view>
 
       <view class="action-bar">
-        <button class="action-btn primary" open-type="share">分享给朋友</button>
+        <button class="action-btn primary no-after" open-type="share">分享给朋友</button>
         <view wx:if="{{drawDetail.status === 1}}" class="action-btn" bindtap="copyResult">复制结果</view>
         <view wx:if="{{!hasParticipated && drawDetail.status === 0}}" class="action-btn primary" bindtap="goToDraw">立即参与</view>
         <view wx:if="{{isCreator && drawDetail.status !== 1}}" class="action-btn danger {{closing ? 'disabled' : ''}}" bindtap="handleCloseDraw">{{closing ? '结束中…' : '结束抽签'}}</view>

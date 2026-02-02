@@ -13,7 +13,7 @@
   padding: 100rpx 0;
 }
 
-.error text {
+.error-text {
   font-size: 28rpx;
   color: #666;
   margin-bottom: 30rpx;
@@ -145,7 +145,7 @@
   align-items: center;
   width: 120rpx;
 }
-.avatar-item image {
+.avatar-item .img {
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
@@ -218,4 +218,4 @@
   opacity: 0.5;
   pointer-events: none;
 }
-button::after { border: none; }
+
