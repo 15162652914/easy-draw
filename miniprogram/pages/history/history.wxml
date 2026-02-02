@@ -66,7 +66,7 @@
         <view class="draw-participants">
           <text class="count">{{item.participantCount}}</text> / {{item.upperLimit || item.totalCount}} 人参与
         </view>
-          <view wx:if="{{activeTab === 'created' && item.statusClass === 'active'}}" class="terminate-btn" catchtap="closeFromHistory" data-drawid="{{item._id}}">结束抽签</view>
+          <view wx:if="{{activeTab === 'created' && item.statusClass === 'active'}}" class="terminate-btn {{closingId === item._id ? 'disabled' : ''}}" catchtap="closeFromHistory" data-drawid="{{item._id}}">结束抽签</view>
       </view>
     </view>
   </view>

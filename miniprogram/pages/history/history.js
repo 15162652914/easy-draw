@@ -12,7 +12,8 @@ Page({
     hasMore: true,
     page: 0,
     error: '',
-    userInfo: null
+    userInfo: null,
+    closingId: ''
   },
 
   onLoad() {
@@ -185,15 +186,17 @@ Page({
 
   async closeFromHistory(e) {
     const { drawid } = e.currentTarget.dataset
+    // 防重复点击：正在终止该抽签时直接返回
+    if (this.data.closingId === drawid) return
     wx.showModal({
       title: '终止抽签',
       content: '终止后将不可继续参与，是否确认？',
       success: async (res) => {
         if (!res.confirm) return
+        this.setData({ closingId: drawid })
         wx.showLoading({ title: '终止中...' })
         try {
           const result = await closeDraw({ drawId: drawid })
-          wx.hideLoading()
           if (result.success) {
             wx.showToast({ title: '已终止', icon: 'success' })
             this.loadHistory(true)
@@ -201,8 +204,10 @@ Page({
             wx.showToast({ title: result.message || '终止失败', icon: 'none' })
           }
         } catch (e) {
-          wx.hideLoading()
           wx.showToast({ title: '终止失败，请重试', icon: 'none' })
+        } finally {
+          wx.hideLoading()
+          this.setData({ closingId: '' })
         }
       }
     })
