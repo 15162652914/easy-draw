@@ -66,11 +66,19 @@ exports.main = async (event, context) => {
       result = participants.length + 1;
     }
     
-    // 4. 获取用户信息（实际应从客户端传，这里简化）
-    const userResult = await db.collection('users').where({ _openid: openId }).get();
-    const userInfo = userResult.data[0] || {};
-    
-    // 5. 更新参与者列表
+    // 4. 获取用户信息（优先使用客户端传入，其次使用 users 表快照，最后降级为匿名）
+    let userInfo = { nickname: '', avatar: '' };
+    try {
+      const userResult = await db.collection('users').doc(openId).get();
+      if (userResult.data) {
+        userInfo.nickname = userResult.data.nickName || userResult.data.nickname || '';
+        userInfo.avatar = userResult.data.avatarUrl || userResult.data.avatar || '';
+      }
+    } catch (e) {
+      // users 表无记录时忽略，按匿名处理
+    }
+
+    // 5. 更新参与者列表（保存快照：openId, nickname, avatar, result, drawTime）
     const newParticipant = {
       openId: openId,
       nickname: event.nickname || userInfo.nickname || '匿名用户',

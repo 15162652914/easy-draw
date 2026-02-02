@@ -1,0 +1,12 @@
+{
+  "name": "saveUserInfo",
+  "version": "1.0.0",
+  "description": "cloud function: save user basic profile info",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

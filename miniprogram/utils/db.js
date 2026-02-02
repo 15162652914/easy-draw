@@ -132,3 +132,23 @@ export const closeDraw = async (data) => {
     }
   }
 }
+
+// （可选）保存用户基础信息：头像、昵称等
+// 说明：
+// - 仅提供能力，当前默认不在登录流程中自动调用
+// - 调用方可在获取用户授权后按需调用
+export const saveUserInfo = async (userInfo) => {
+  try {
+    const result = await wx.cloud.callFunction({
+      name: 'saveUserInfo',
+      data: { userInfo }
+    })
+    return result.result
+  } catch (error) {
+    console.error('保存用户信息失败:', error)
+    return {
+      success: false,
+      message: '网络错误，请重试'
+    }
+  }
+}

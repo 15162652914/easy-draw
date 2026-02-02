@@ -65,13 +65,13 @@
 }
 
 .retry-btn, .create-btn {
-  height: 80rpx;
-  line-height: 80rpx;
+  height: 72rpx;
+  line-height: 72rpx;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
-  font-size: 30rpx;
-  border-radius: 40rpx;
-  padding: 0 60rpx;
+  font-size: 26rpx;
+  border-radius: 36rpx;
+  padding: 0 40rpx;
   border: none;
 }
 
