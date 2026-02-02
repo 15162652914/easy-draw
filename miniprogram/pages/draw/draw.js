@@ -165,6 +165,7 @@ Page({
         wx.showToast({ title: result.message, icon: 'success' })
 
         // 更新本地状态：把新参与者追加到 participants（即时反馈）
+        const updatedDetail = Object.assign({}, drawDetail)
         const participant = {
           openId: wx.getStorageSync('openId'),
           nickname: userInfo.nickName,
@@ -173,8 +174,6 @@ Page({
           resultText: this.resolveResultText(updatedDetail, result.data?.result ?? null),
           drawTime: Date.now()
         }
-
-        const updatedDetail = Object.assign({}, drawDetail)
         updatedDetail.participants = updatedDetail.participants ? [...updatedDetail.participants, participant] : [participant]
         // 如果参与人数已满，更新状态为 FULL（优先使用 maxParticipants）
         const upperLimit = (typeof updatedDetail.maxParticipants === 'number' && updatedDetail.maxParticipants > 0)
@@ -210,7 +209,7 @@ Page({
   // 将结果值映射为选项文本（数字视为 1-based 索引）
   resolveResultText(draw, result) {
     if (result === null || result === undefined) return ''
-    const opts = Array.isArray(draw.options) ? draw.options : []
+    const opts = draw && Array.isArray(draw.options) ? draw.options : []
     const n = typeof result === 'number' ? result : parseInt(result, 10)
     if (!isNaN(n)) {
       const idx = n - 1
