@@ -9,9 +9,19 @@ exports.main = async (event, context) => {
   const openId = wxContext.OPENID;
   
   try {
+    // 解析类型：支持数值枚举或历史字符串
+    const TYPE_MAP = {
+      'normal': 0,
+      'sequence': 1,
+      'random': 2,
+      'group': 3
+    }
+    let typeVal = type
+    if (typeof typeVal === 'string') typeVal = TYPE_MAP[typeVal] ?? TYPE_MAP['sequence']
+
     // 生成签池（如果是顺序抽签，预生成1-N的数组并打乱）
     let lotsPool = [];
-    if (type === 'sequence') {
+    if (typeVal === 1) {
       lotsPool = Array.from({length: totalCount}, (_, i) => i + 1);
       // Fisher-Yates 洗牌算法
       for (let i = lotsPool.length - 1; i > 0; i--) {
@@ -24,7 +34,8 @@ exports.main = async (event, context) => {
       data: {
         _openid: openId,
         title: title || '未命名抽签',
-        type: type || 'sequence', // sequence, random, group
+        // 保存数值枚举类型（兼容旧字符串类型）
+        type: typeof typeVal === 'number' ? typeVal : TYPE_MAP['sequence'],
         options: options || [],
         totalCount: totalCount || 10,
         lotsPool: lotsPool, // 预生成的签池，已被抽的设为null

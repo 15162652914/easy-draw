@@ -1,6 +1,6 @@
 const { getDrawDetail, closeDraw } = require('../../utils/db')
 const { formatTime } = require('../../utils/util')
-const { DRAW_STATUS, DRAW_STATUS_TEXT } = require('../../utils/constants')
+const { DRAW_STATUS, DRAW_STATUS_TEXT, DRAW_TYPE, DRAW_TYPE_TEXT } = require('../../utils/constants')
 
 Page({
   data: {
@@ -79,12 +79,21 @@ Page({
 
     draw.createTimeFormatted = formatTime(draw.createTime)
     
-    const typeMap = {
-      'sequence': '顺序抽签',
-      'random': '随机抽选',
-      'group': '分组抽签'
+    // 兼容旧字符串类型或新版数值枚举
+    let typeVal = draw.type
+    if (typeof typeVal === 'string') {
+      // 将字符串映射为数值枚举（兼容历史数据）
+      const map = {
+        'normal': DRAW_TYPE.NORMAL,
+        'sequence': DRAW_TYPE.SEQUENCE,
+        'random': DRAW_TYPE.RANDOM,
+        'group': DRAW_TYPE.GROUP
+      }
+      typeVal = map[typeVal] ?? DRAW_TYPE.SEQUENCE
     }
-    draw.typeText = typeMap[draw.type] || '普通抽签'
+    // 统一保存在 draw.type 为数值枚举
+    draw.type = typeof typeVal === 'number' ? typeVal : DRAW_TYPE.SEQUENCE
+    draw.typeText = DRAW_TYPE_TEXT[draw.type] || '普通抽签'
 
     // 兼容旧字符串状态，转换为数字枚举
     let statusVal = draw.status
@@ -113,7 +122,7 @@ Page({
       })
     }
 
-    if (draw.type === 'group' && draw.status === DRAW_STATUS.CLOSED) {
+    if (draw.type === DRAW_TYPE.GROUP && draw.status === DRAW_STATUS.CLOSED) {
       const grouped = draw.participants.reduce((acc, p) => {
         const groupName = p.result || '未分配'
         if (!acc[groupName]) acc[groupName] = []

@@ -1,5 +1,5 @@
 const { getUserDraws, getCreatorDraws, closeDraw } = require('../../utils/db')
-const { DRAW_STATUS, DRAW_STATUS_TEXT } = require('../../utils/constants')
+const { DRAW_STATUS, DRAW_STATUS_TEXT, DRAW_TYPE, DRAW_TYPE_TEXT } = require('../../utils/constants')
 
 const PAGE_SIZE = 10
 
@@ -169,12 +169,16 @@ Page({
 
   // 获取抽签类型文本
   getTypeText(type) {
-    const typeMap = {
-      'sequence': '顺序抽签',
-      'random': '随机抽选',
-      'group': '分组抽签'
+    // 支持字符串与数值枚举
+    if (typeof type === 'number') return DRAW_TYPE_TEXT[type] || '普通抽签'
+    const map = {
+      'normal': DRAW_TYPE.NORMAL,
+      'sequence': DRAW_TYPE.SEQUENCE,
+      'random': DRAW_TYPE.RANDOM,
+      'group': DRAW_TYPE.GROUP
     }
-    return typeMap[type] || '普通抽签'
+    const val = map[type]
+    return DRAW_TYPE_TEXT[val] || '普通抽签'
   },
 
   viewDrawDetail(e) {

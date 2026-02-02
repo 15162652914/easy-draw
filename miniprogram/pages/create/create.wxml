@@ -17,6 +17,33 @@
   <view class="card">
     <view class="form-item">
       <view class="label-wrapper">
+        <text class="icon">⚙️</text>
+        <text class="label">抽签方式</text>
+      </view>
+      <radio-group bindchange="onTypeChange" class="type-group">
+        <label class="type-item">
+          <radio value="0" checked="{{type===0}}" />
+          <text class="type-label">普通抽签</text>
+        </label>
+        <label class="type-item">
+          <radio value="1" checked="{{type===1}}" />
+          <text class="type-label">顺序抽签</text>
+        </label>
+        <label class="type-item">
+          <radio value="2" checked="{{type===2}}" />
+          <text class="type-label">随机抽选</text>
+        </label>
+        <label class="type-item">
+          <radio value="3" checked="{{type===3}}" />
+          <text class="type-label">分组抽签</text>
+        </label>
+      </radio-group>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="form-item">
+      <view class="label-wrapper">
         <text class="icon">🗳️</text>
         <text class="label">抽签选项</text>
       </view>

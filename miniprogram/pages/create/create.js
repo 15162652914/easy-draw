@@ -1,5 +1,6 @@
 const { createDraw } = require('../../utils/db')
 const templateManager = require('../../utils/templateManager')
+const { DRAW_TYPE, DRAW_TYPE_TEXT } = require('../../utils/constants')
 
 Page({
   data: {
@@ -8,7 +9,10 @@ Page({
     expireDate: '',
     today: '',
     userInfo: null,
-    maxParticipants: ''
+    maxParticipants: '',
+    // 抽签方式，使用数值枚举
+    type: DRAW_TYPE.SEQUENCE,
+    drawTypeTextMap: DRAW_TYPE_TEXT
   },
 
   onLoad(options) {
@@ -91,6 +95,13 @@ Page({
     this.setData({ maxParticipants: String(capped) })
   },
 
+  onTypeChange(e) {
+    // radio 的 value 传回为字符串，转换为数字枚举
+    const val = e.detail.value
+    const n = parseInt(val, 10)
+    if (!isNaN(n)) this.setData({ type: n })
+  },
+
   onOptionChange(e) {
     const { index } = e.currentTarget.dataset
     const value = e.detail.value
@@ -154,6 +165,7 @@ Page({
     try {
       const result = await createDraw({
         title,
+        type: this.data.type,
         options: validOptions,
         creatorInfo: {
           openId: wx.getStorageSync('openId'),

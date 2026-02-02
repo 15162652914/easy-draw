@@ -43,7 +43,7 @@
         <text class="ongoing-tip">抽签进行中，已有 {{drawDetail.participantCount}} 人参与{{drawDetail.upperLimit ? (' / 上限 ' + drawDetail.upperLimit) : ''}}</text>
       </view>
 
-      <view wx:if="{{drawDetail.type === 'group' && drawDetail.status === 1}}">
+      <view wx:if="{{drawDetail.groupedParticipants && drawDetail.status === 1}}">
         <view wx:for="{{Object.keys(drawDetail.groupedParticipants)}}" wx:for-item="groupName" wx:key="groupName" class="group-section">
           <view class="group-name">{{groupName}}</view>
           <view class="group-members">
@@ -56,7 +56,7 @@
         </view>
       </view>
 
-      <view wx:elif="{{drawDetail.type !== 'group'}}" class="result-list">
+      <view wx:elif="{{!drawDetail.groupedParticipants}}" class="result-list">
         <view wx:for="{{drawDetail.participants}}" wx:key="openId" class="result-item {{item.openId === openId ? 'my-entry' : ''}}">
           <view class="participant-info">
             <image src="{{item.avatar}}" class="avatar-small" />
