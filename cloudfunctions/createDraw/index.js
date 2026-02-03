@@ -4,7 +4,7 @@ const db = cloud.database();
 const _ = db.command;
 
 exports.main = async (event, context) => {
-  const { title, type, options, totalCount, groupId, maxParticipants } = event;
+  const { title, type, options, totalCount, groupId, maxParticipants, winnerQuota } = event;
   const wxContext = cloud.getWXContext();
   const openId = wxContext.OPENID;
   
@@ -19,10 +19,16 @@ exports.main = async (event, context) => {
     let typeVal = type
     if (typeof typeVal === 'string') typeVal = TYPE_MAP[typeVal] ?? TYPE_MAP['sequence']
 
-    // 生成签池（如果是顺序抽签，预生成1-N的数组并打乱）
+    // 生成签池：sequence 类型
+    // - 若提供 options（如任务分配），则以打乱后的 options 为签池，保证一人一个且不重复
+    // - 否则回退为 1..N 序列并打乱
     let lotsPool = [];
     if (typeVal === 1) {
-      lotsPool = Array.from({length: totalCount}, (_, i) => i + 1);
+      if (Array.isArray(options) && options.length > 0) {
+        lotsPool = [...options];
+      } else {
+        lotsPool = Array.from({length: totalCount}, (_, i) => i + 1);
+      }
       // Fisher-Yates 洗牌算法
       for (let i = lotsPool.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -30,6 +36,14 @@ exports.main = async (event, context) => {
       }
     }
     
+    // 计算赢家选项（用于 RANDOM + winnerQuota）
+    let winnerOption = null;
+    if (typeVal === 2 && Array.isArray(options) && options.length > 0) {
+      // 优先匹配“获得名额”，否则默认第一个选项
+      const idx = options.findIndex(o => String(o) === '获得名额');
+      winnerOption = idx >= 0 ? options[idx] : options[0];
+    }
+
     const result = await db.collection('draws').add({
       data: {
         _openid: openId,
@@ -37,10 +51,17 @@ exports.main = async (event, context) => {
         // 保存数值枚举类型（兼容旧字符串类型）
         type: typeof typeVal === 'number' ? typeVal : TYPE_MAP['sequence'],
         options: options || [],
-        totalCount: totalCount || 10,
+        // 当存在 options（任务分配）时，以 options.length 作为总数，避免参与人数超过任务数量
+        totalCount: (Array.isArray(options) && options.length > 0)
+          ? options.length
+          : (totalCount || 10),
         lotsPool: lotsPool, // 预生成的签池，已被抽的设为null
         // 新增：最大参与人数（可选）。未设置则按 totalCount 或 options 长度限制。
         maxParticipants: typeof maxParticipants === 'number' && maxParticipants > 0 ? maxParticipants : null,
+        // 赢家名额（仅在 RANDOM 类型有意义）
+        winnerQuota: typeof winnerQuota === 'number' && winnerQuota > 0 ? winnerQuota : null,
+        winnersCount: 0,
+        winnerOption: winnerOption,
         status: 0, // 0 = ongoing
         participants: [],
         groupId: groupId || '',

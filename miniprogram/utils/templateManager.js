@@ -38,7 +38,7 @@ module.exports = {
       try {
         const resp = await wx.cloud.callFunction({ name: 'listTemplates' })
         if (resp && resp.result && resp.result.success) {
-          custom = resp.result.data.map(t => ({ templateId: t.templateId, title: t.title, desc: t.desc, options: t.options }))
+          custom = resp.result.data.map(t => ({ templateId: t.templateId, title: t.title, desc: t.desc, options: t.options, preferredType: t.preferredType }))
         } else {
           custom = loadCustomTemplatesLocal()
         }
@@ -55,21 +55,22 @@ module.exports = {
       templateId: t.templateId || (t.id ? Number(t.id) : Date.now()),
       title: t.title,
       desc: t.desc,
-      options: t.options
+      options: t.options,
+      preferredType: t.preferredType
     }))
 
     return [...DEFAULT_TEMPLATES, ...custom]
   },
 
   // 添加自定义模板，优先写入云端（返回 Promise -> new template）
-  async addCustomTemplate({ title, desc = '', options = [] }) {
+  async addCustomTemplate({ title, desc = '', options = [], preferredType = 'sequence' }) {
     if (!title || !Array.isArray(options) || options.length < 1) return null
     if (isCloudAvailable()) {
       try {
-        const resp = await wx.cloud.callFunction({ name: 'createTemplate', data: { title, desc, options } })
+        const resp = await wx.cloud.callFunction({ name: 'createTemplate', data: { title, desc, options, preferredType } })
         if (resp && resp.result && resp.result.success) {
           const templateId = resp.result.data.templateId
-          const newT = { templateId: templateId, title, desc, options }
+          const newT = { templateId: templateId, title, desc, options, preferredType }
           return newT
         }
       } catch (e) {
@@ -79,7 +80,7 @@ module.exports = {
 
     // 本地保存（id 使用本地时间戳）
     const templateId = Date.now()
-    const newT = { templateId, title, desc, options }
+    const newT = { templateId, title, desc, options, preferredType }
     const list = loadCustomTemplatesLocal()
     list.push(newT)
     saveCustomTemplatesLocal(list)

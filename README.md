@@ -1,3 +1,25 @@
+## 集成 Vant Weapp 组件库
+
+本项目已引入 `@vant/weapp`，用于底部弹窗（Popup/ActionSheet）等交互组件。
+
+使用步骤（微信开发者工具）：
+
+1. 在“详情 → 本地设置”中勾选“使用 npm 模块”。
+2. 点击菜单“工具 → 构建 npm”，生成 `miniprogram_npm`。
+3. 页面中通过 `usingComponents` 引用组件，例如：
+
+	- `van-popup`: `@vant/weapp/popup/index`
+	- `van-action-sheet`: `@vant/weapp/action-sheet/index`
+
+若需要更新或安装依赖（命令行）：
+
+```bash
+npm install
+npm install @vant/weapp --save
+```
+
+然后回到微信开发者工具再次“构建 npm”。
+
 # 云开发 quickstart
 # Easy Draw —— 微信小程序抽签/抽奖工具
 

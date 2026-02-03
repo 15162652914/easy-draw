@@ -1,4 +1,16 @@
 /**app.wxss**/
+
+/* Vant Weapp 主题变量覆盖 - 匹配项目主题色 */
+page {
+  --van-primary-color: #667eea;
+  --van-success-color: #2ecc71;
+  --van-button-primary-background-color: #667eea;
+  --van-button-primary-border-color: #667eea;
+  --van-action-sheet-item-text-color: #333;
+  --van-action-sheet-description-color: #666;
+  --van-popup-round-border-radius: 24rpx;
+}
+
 .container {
   box-sizing: border-box;
 } 

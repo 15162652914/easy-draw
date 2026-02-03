@@ -9,64 +9,92 @@ exports.main = async (event, context) => {
   const openId = wxContext.OPENID;
   
   try {
-    // 1. 检查是否已参与
-    const draw = await db.collection('draws').doc(drawId).get();
-    if (!draw.data) {
+    // 事务式分配，防止并发拿到同一任务
+    const transaction = await db.startTransaction();
+
+    // 1. 读取抽签信息（事务内）
+    const docRes = await transaction.collection('draws').doc(drawId).get();
+    const draw = docRes.data;
+    if (!draw) {
+      await transaction.rollback();
       return { success: false, message: '抽签不存在' };
     }
-    
-    const participants = draw.data.participants || [];
+
+    const participants = draw.participants || [];
     const hasJoined = participants.find(p => p.openId === openId);
-    
     if (hasJoined) {
-      return { 
-        success: true, 
-        data: {
-          hasJoined: true,
-          result: hasJoined.result,
-        },
-        message: '已参与过' 
+      await transaction.rollback();
+      return {
+        success: true,
+        data: { hasJoined: true, result: hasJoined.result },
+        message: '已参与过'
       };
     }
-    
-    // 2. 检查是否已满 -> 使用数字状态判断
-    // draw.data.status: 0=ongoing,1=closed,2=full
-    if (draw.data.status === 1) {
+
+    // 2. 状态与上限校验（事务内）
+    if (draw.status === 1) {
+      await transaction.rollback();
       return { success: false, data: {}, message: '抽签已结束' };
     }
-    // 参与人数上限优先：maxParticipants > totalCount > options.length
-    const upperLimit = (typeof draw.data.maxParticipants === 'number' && draw.data.maxParticipants > 0)
-      ? draw.data.maxParticipants
-      : (typeof draw.data.totalCount === 'number' && draw.data.totalCount > 0)
-        ? draw.data.totalCount
-        : Array.isArray(draw.data.options)
-          ? draw.data.options.length
+    const upperLimit = (typeof draw.maxParticipants === 'number' && draw.maxParticipants > 0)
+      ? draw.maxParticipants
+      : (typeof draw.totalCount === 'number' && draw.totalCount > 0)
+        ? draw.totalCount
+        : Array.isArray(draw.options)
+          ? draw.options.length
           : 0;
     if (upperLimit > 0 && participants.length >= upperLimit) {
-      // 可选：将状态更新为已满
-      await db.collection('draws').doc(drawId).update({ data: { status: 2, updateTime: db.serverDate() } });
-      return { success: false, data: {}, message: '名额已满' };
+      await transaction.collection('draws').doc(drawId).update({ data: { status: 1, updateTime: db.serverDate() } });
+      await transaction.commit();
+      return { success: false, data: {}, message: '抽签已结束' };
     }
-    
-    // 3. 分配结果（从预生成的池中取）
+
+    // 3. 分配结果（事务内从签池弹出一个）
     let result;
-    const lotsPool = draw.data.lotsPool || [];
-    const availableIndex = lotsPool.findIndex(item => item !== null);
-    
-    if (availableIndex !== -1) {
-      result = lotsPool[availableIndex];
-      // 标记为已使用
-      await db.collection('draws').doc(drawId).update({
-        data: {
-          [`lotsPool.${availableIndex}`]: null
-        }
-      });
-    } else {
-      // 备用：随机生成（理论上不会走到这里）
-      result = participants.length + 1;
+    const lotsPool = draw.lotsPool || [];
+    const hasOptions = Array.isArray(draw.options) && draw.options.length > 0;
+    const nonNullIndexes = lotsPool
+      .map((v, idx) => (v !== null ? idx : -1))
+      .filter(idx => idx !== -1);
+
+    if (nonNullIndexes.length === 0) {
+      // 签池为空：自动置为 CLOSED(1)
+      await transaction.collection('draws').doc(drawId).update({ data: { status: 1, updateTime: db.serverDate() } });
+      await transaction.commit();
+      const msg = hasOptions ? '任务已分配完毕' : '抽签已结束';
+      return { success: false, data: {}, message: msg };
     }
-    
-    // 4. 获取用户信息（优先使用客户端传入，其次使用 users 表快照，最后降级为匿名）
+
+    // 按类型决定分配策略
+    const drawType = typeof draw.type === 'number' ? draw.type : 1; // 默认 sequence
+    let pick = null;
+    if (drawType === 2 /* RANDOM */) {
+      // 随机抽选，支持赢家名额
+      const opts = Array.isArray(draw.options) ? draw.options : [];
+      if (opts.length === 0) {
+        await transaction.rollback();
+        return { success: false, data: {}, message: '无有效选项' };
+      }
+      const winnerQuota = typeof draw.winnerQuota === 'number' && draw.winnerQuota > 0 ? draw.winnerQuota : 0;
+      const winnersCount = typeof draw.winnersCount === 'number' ? draw.winnersCount : 0;
+      const winnerOption = draw.winnerOption || (opts.find(o => String(o) === '获得名额') || opts[0]);
+
+      if (winnerQuota > 0 && winnersCount < winnerQuota) {
+        // 赢家名额未满，优先分配赢家选项
+        result = winnerOption;
+      } else {
+        // 赢家名额已满，随机分配其他选项
+        const others = opts.filter(o => String(o) !== String(winnerOption));
+        const pickFrom = others.length > 0 ? others : opts;
+        result = pickFrom[Math.floor(Math.random() * pickFrom.length)];
+      }
+    } else {
+      // SEQUENCE / 其他：从签池随机弹出一个
+      pick = nonNullIndexes[Math.floor(Math.random() * nonNullIndexes.length)];
+      result = lotsPool[pick];
+    }
+
+    // 4. 获取用户信息（事务外读取 users，不影响并发安全）
     let userInfo = { nickname: '', avatar: '' };
     try {
       const userResult = await db.collection('users').doc(openId).get();
@@ -74,11 +102,9 @@ exports.main = async (event, context) => {
         userInfo.nickname = userResult.data.nickName || userResult.data.nickname || '';
         userInfo.avatar = userResult.data.avatarUrl || userResult.data.avatar || '';
       }
-    } catch (e) {
-      // users 表无记录时忽略，按匿名处理
-    }
+    } catch (e) {}
 
-    // 5. 更新参与者列表（保存快照：openId, nickname, avatar, result, drawTime）
+    // 5. 写入参与者并标记签池项为空（事务内一次性更新）
     const newParticipant = {
       openId: openId,
       nickname: event.nickname || userInfo.nickname || '匿名用户',
@@ -86,24 +112,34 @@ exports.main = async (event, context) => {
       result: result,
       drawTime: db.serverDate()
     };
-    
-    await db.collection('draws').doc(drawId).update({
-      data: {
-        participants: _.push([newParticipant]),
-        updateTime: db.serverDate()
+
+    const updatedParticipants = participants.concat([newParticipant]);
+    const updateData = {
+      updateTime: db.serverDate(),
+      participants: updatedParticipants
+    };
+    if (pick !== null && pick !== undefined) {
+      updateData[`lotsPool.${pick}`] = null;
+    }
+    // 若为 RANDOM 且命中赢家选项，则递增 winnersCount
+    if (drawType === 2) {
+      const winnerOption = draw.winnerOption || (Array.isArray(draw.options) && (draw.options.find(o => String(o) === '获得名额') || draw.options[0]));
+      if (winnerOption && String(newParticipant.result) === String(winnerOption)) {
+        updateData['winnersCount'] = (typeof draw.winnersCount === 'number' ? draw.winnersCount : 0) + 1;
       }
-    });
-    
+    }
+
+    await transaction.collection('draws').doc(drawId).update({ data: updateData });
+    await transaction.commit();
+
     return {
       success: true,
-      data: {
-        hasJoined: false,
-        result: result,
-      },
+      data: { hasJoined: false, result: result },
       message: '抽签成功'
     };
     
   } catch (err) {
+    try { await db.rollbackTransaction(); } catch (e) {}
     return {
       success: false,
       data: {},

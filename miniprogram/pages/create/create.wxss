@@ -37,11 +37,20 @@
   color: #333;
 }
 
+/* info button next to label */
+.info-btn {
+  margin-left: 12rpx;
+  font-size: 24rpx;
+  color: #888;
+}
+.info-btn:active {
+  opacity: 0.7;
+}
+
 .tip {
   font-size: 24rpx;
   color: #999;
   margin-bottom: 24rpx;
-  margin-top: -12rpx;
 }
 
 .input, .option-input {
@@ -230,3 +239,13 @@
 }
 .type-item.selected .circle .check { color: #fff; font-weight: 700; }
 .type-item.selected .type-label { color: #2ecc71; font-weight: 700; }
+
+/* Bottom sheet content inside van-popup */
+.sheet-content { padding: 16rpx 0 24rpx; }
+.sheet-header { padding: 24rpx 32rpx 0; font-size: 32rpx; font-weight: 600; }
+.sheet-body { padding: 12rpx 32rpx 24rpx; }
+.sheet-item { margin-top: 24rpx; }
+.sheet-title { font-size: 28rpx; font-weight: 500; color: #333; }
+.sheet-desc { font-size: 26rpx; color: #666; margin-top: 8rpx; line-height: 1.6; }
+.sheet-footer { padding: 20rpx 32rpx 40rpx; }
+.sheet-close { width: 100%; background: var(--van-button-primary-background-color); color: #fff; text-align: center; border-radius: 12rpx; padding: 20rpx 0; font-size: 28rpx; }

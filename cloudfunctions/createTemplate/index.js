@@ -3,9 +3,9 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
-// createTemplate: { title, desc, options }
+// createTemplate: { title, desc, options, preferredType }
 exports.main = async (event, context) => {
-  const { title, desc = '', options = [] } = event
+  const { title, desc = '', options = [], preferredType = 'sequence' } = event
   if (!title || !Array.isArray(options) || options.length === 0) {
     return { success: false, message: '参数不完整' }
   }
@@ -31,6 +31,7 @@ exports.main = async (event, context) => {
         title,
         desc,
         options,
+        preferredType,
         isCustom: true,
         owner: cloud.getWXContext().OPENID,
         createTime: db.serverDate()

@@ -10,12 +10,14 @@ Page({
     today: '',
     userInfo: null,
     maxParticipants: '',
+    winnerQuota: '',
+    showTypeSheet: false,
     // 抽签方式，使用数值枚举
     type: DRAW_TYPE.SEQUENCE,
     drawTypeTextMap: DRAW_TYPE_TEXT,
     // 用于渲染的抽签方式数组（用于 wx:for）
     typeOptions: [
-      { value: DRAW_TYPE.NORMAL, label: '普通抽签' },
+      // { value: DRAW_TYPE.NORMAL, label: '普通抽签' },
       { value: DRAW_TYPE.SEQUENCE, label: '顺序抽签' },
       { value: DRAW_TYPE.RANDOM, label: '随机抽选' },
       { value: DRAW_TYPE.GROUP, label: '分组抽签' }
@@ -29,7 +31,7 @@ Page({
   },
 
   async saveTemplate() {
-    const { title, options } = this.data
+    const { title, options, type } = this.data
     if (!title) {
       wx.showToast({ title: '请输入模板标题', icon: 'none' })
       return
@@ -38,16 +40,25 @@ Page({
       wx.showToast({ title: '请添加至少1个选项', icon: 'none' })
       return
     }
-
+    
+    // 直接使用当前选择的抽签方式
+    const typeMapRev = {
+      [DRAW_TYPE.NORMAL]: 'normal',
+      [DRAW_TYPE.SEQUENCE]: 'sequence',
+      [DRAW_TYPE.RANDOM]: 'random',
+      [DRAW_TYPE.GROUP]: 'group'
+    }
+    const preferredType = typeMapRev[type] || 'sequence'
+    
     try {
-      const newT = await templateManager.addCustomTemplate({ title, desc: '', options })
+      const newT = await templateManager.addCustomTemplate({ title, desc: '', options, preferredType })
       if (newT) {
         wx.showToast({ title: '已保存为自定义模板', icon: 'success' })
       } else {
         wx.showToast({ title: '保存模板失败', icon: 'none' })
       }
-    } catch (e) {
-      console.error('保存模板失败', e)
+    } catch (err) {
+      console.error('保存模板失败', err)
       wx.showToast({ title: '保存模板失败', icon: 'none' })
     }
   },
@@ -59,7 +70,19 @@ Page({
       templateManager.getAllTemplates().then(list => {
         const found = list.find(t => String(t.templateId) === String(tid))
         if (found) {
-          this.setData({ title: found.title, options: found.options })
+          // 根据模板建议的抽签方式设置 type
+          let nextType = this.data.type
+          if (found.preferredType) {
+            const map = {
+              normal: DRAW_TYPE.NORMAL,
+              sequence: DRAW_TYPE.SEQUENCE,
+              random: DRAW_TYPE.RANDOM,
+              group: DRAW_TYPE.GROUP
+            }
+            const key = String(found.preferredType).toLowerCase()
+            nextType = map[key] ?? nextType
+          }
+          this.setData({ title: found.title, options: found.options, type: nextType })
         }
       }).catch(err => {
         console.error('查找模板失败', err)
@@ -103,6 +126,22 @@ Page({
     this.setData({ maxParticipants: String(capped) })
   },
 
+  onWinnerQuotaChange(e) {
+    // 仅允许正整数，空值表示不设置赢家名额
+    const raw = String(e.detail.value || '').trim()
+    if (!raw) {
+      this.setData({ winnerQuota: '' })
+      return
+    }
+    const val = parseInt(raw, 10)
+    if (isNaN(val) || val <= 0) {
+      wx.showToast({ title: '请输入大于0的数字', icon: 'none' })
+      return
+    }
+    const capped = Math.min(val, 100000)
+    this.setData({ winnerQuota: String(capped) })
+  },
+
   onTypeChange(e) {
     // radio 的 value 传回为字符串，转换为数字枚举
     const val = e.detail.value
@@ -114,6 +153,13 @@ Page({
     const v = e.currentTarget.dataset.value
     const n = typeof v === 'string' ? parseInt(v, 10) : v
     if (!isNaN(n)) this.setData({ type: n })
+  },
+
+  showTypeHelp() {
+    this.setData({ showTypeSheet: true })
+  },
+  closeTypeSheet() {
+    this.setData({ showTypeSheet: false })
   },
 
   onOptionChange(e) {
@@ -149,7 +195,7 @@ Page({
   },
 
   async createDraw() {
-    const { title, options, expireDate, userInfo, maxParticipants } = this.data
+    const { title, options, expireDate, userInfo, maxParticipants, winnerQuota } = this.data
     
     // 验证表单
     if (!title) {
@@ -188,7 +234,9 @@ Page({
         },
         expireTime: expireDate ? new Date(expireDate).getTime() : null,
         // 传递最大参与人数（可选）
-        maxParticipants: maxParticipants ? parseInt(maxParticipants, 10) : undefined
+        maxParticipants: maxParticipants ? parseInt(maxParticipants, 10) : undefined,
+        // 赢家名额（仅在 RANDOM 类型有意义）
+        winnerQuota: winnerQuota ? parseInt(winnerQuota, 10) : undefined
       })
       
       wx.hideLoading()

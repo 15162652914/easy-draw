@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "创建抽签",
-  "usingComponents": {}
+  "usingComponents": {
+    "van-popup": "@vant/weapp/popup/index"
+  }
 }
