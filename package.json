@@ -1,0 +1,23 @@
+{
+  "name": "easy-draw",
+  "version": "1.0.0",
+  "description": "一个基于微信云开发（CloudBase/TCB）的轻量抽签/抽奖小程序，支持模版管理、多人参与、结果展示与分享，适用于活动名额分配、任务安排、快速决策等场景。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/15162652914/easy-draw.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/15162652914/easy-draw/issues"
+  },
+  "homepage": "https://github.com/15162652914/easy-draw#readme",
+  "dependencies": {
+    "@vant/weapp": "^1.11.7"
+  }
+}
