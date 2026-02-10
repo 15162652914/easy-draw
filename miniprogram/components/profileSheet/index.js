@@ -1,3 +1,5 @@
+const { updateUserInfo } = require('../../utils/userinfo')
+
 Component({
   properties: {
     show: {
@@ -12,7 +14,8 @@ Component({
 
   data: {
     internalShow: false,
-    nickName: ''
+    nickName: '',
+    saving: false
   },
 
   observers: {
@@ -27,7 +30,7 @@ Component({
     },
 
     onClose() {
-      this.setData({ internalShow: false, nickName: '' })
+      this.setData({ internalShow: false, nickName: '', saving: false })
       this.triggerEvent('close')
     },
 
@@ -35,18 +38,51 @@ Component({
       this.onClose()
     },
 
-    onConfirm() {
+    async onConfirm() {
+      if (this.data.saving) return
+
       const nickName = (this.data.nickName || '').trim()
       if (!nickName) {
         wx.showToast({ title: '昵称不能为空', icon: 'none' })
         return
       }
-      this.setData({ internalShow: false })
-      this.triggerEvent('confirm', {
+
+      this.setData({ saving: true })
+
+      const payload = {
         nickName,
         avatarUrl: this.data.avatarUrl || ''
-      })
-      this.setData({ nickName: '' })
+      }
+
+      try {
+        const res = await updateUserInfo(payload)
+
+        if (res && res.success && res.data) {
+          const { openId, nickName: finalNickName, avatarUrl: finalAvatarUrl } = res.data
+          const mergedUserInfo = {
+            nickName: finalNickName || payload.nickName,
+            avatarUrl: finalAvatarUrl || payload.avatarUrl
+          }
+
+          wx.showToast({ title: '保存成功', icon: 'success' })
+
+          this.setData({ internalShow: false, nickName: '', saving: false })
+
+          // 通知父页面：已保存成功，并返回最终的用户信息和 openId（如果有）
+          this.triggerEvent('confirm', {
+            userInfo: mergedUserInfo,
+            openId: openId || ''
+          })
+        } else {
+          wx.showToast({ title: '保存失败', icon: 'none' })
+          this.setData({ saving: false })
+          console.error('更新用户信息失败:', res)
+        }
+      } catch (e) {
+        wx.showToast({ title: '保存失败', icon: 'none' })
+        this.setData({ saving: false })
+        console.error('更新用户信息异常:', e)
+      }
     }
   }
 })

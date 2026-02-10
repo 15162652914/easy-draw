@@ -1,6 +1,6 @@
 {
   "navigationBarTitleText": "轻抽签",
   "usingComponents": {
-    "cloud-tip-modal": "/components/cloudTipModal/index"
+
   }
 }

@@ -160,4 +160,12 @@
       </view>
     </view>
   </van-popup>
+
+  <!-- 昵称编辑弹窗 -->
+  <profile-sheet
+    show="{{showProfileSheet}}"
+    avatar-url="{{userInfo.avatarUrl || ''}}"
+    bind:confirm="onProfileSheetConfirm"
+    bind:close="onProfileSheetClose"
+  />
 </view>

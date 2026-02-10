@@ -11,7 +11,10 @@ Page({
     userInfo: null,
     isCreator: false,
     joining: false,
-    closing: false
+    closing: false,
+    // 昵称弹窗
+    showProfileSheet: false,
+    pendingProfileAction: ''
   },
 
   onLoad(options) {
@@ -28,14 +31,6 @@ Page({
     const userInfo = wx.getStorageSync('userInfo')
     if (userInfo) {
       this.setData({ userInfo })
-    } else {
-      wx.getUserProfile({
-        desc: '用于完善用户信息',
-        success: (res) => {
-          this.setData({ userInfo: res.userInfo })
-          wx.setStorageSync('userInfo', res.userInfo)
-        }
-      })
     }
   },
 
@@ -129,18 +124,26 @@ Page({
   },
 
   async handleJoinDraw() {
-    const { drawId, userInfo, drawDetail, joined, joining } = this.data
+    const { userInfo, joined, joining } = this.data
     if (joined) {
       wx.showToast({ title: '已参与', icon: 'none' })
       return
     }
     if (joining) return
     
-    if (!userInfo) {
-      wx.showToast({ title: '请先授权获取用户信息', icon: 'none' })
+    // 校验昵称，没有就弹出 profileSheet 录入
+    if (!userInfo || !userInfo.nickName) {
+      this.openProfileSheet('join')
       return
     }
-    
+    await this.doJoinDraw()
+  },
+
+  // 真正执行参与逻辑（假定已具备合法 userInfo）
+  async doJoinDraw() {
+    const { drawId, userInfo, drawDetail, joined, joining } = this.data
+    if (joined || joining) return
+
     if (drawDetail.status !== DRAW_STATUS.ONGOING) {
       wx.showToast({ title: '此抽签当前不可参与', icon: 'none' })
       return
@@ -213,6 +216,39 @@ Page({
     } finally {
       wx.hideLoading()
       this.setData({ joining: false })
+    }
+  },
+  // 打开昵称编辑弹窗
+  openProfileSheet(action) {
+    this.setData({
+      showProfileSheet: true,
+      pendingProfileAction: action || ''
+    })
+  },
+
+  // 关闭昵称弹窗
+  onProfileSheetClose() {
+    this.setData({ showProfileSheet: false, pendingProfileAction: '' })
+  },
+
+  // 昵称弹窗确认
+  onProfileSheetConfirm(e) {
+    const { userInfo, openId } = e.detail || {}
+    const { pendingProfileAction } = this.data
+
+    this.setData({ showProfileSheet: false, pendingProfileAction: '' })
+
+    if (userInfo) {
+      this.setData({ userInfo })
+      wx.setStorageSync('userInfo', userInfo)
+    }
+
+    if (openId) {
+      wx.setStorageSync('openId', openId)
+    }
+
+    if (pendingProfileAction === 'join') {
+      this.doJoinDraw()
     }
   },
 

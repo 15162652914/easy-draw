@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "参与抽签",
-  "usingComponents": {}
+  "usingComponents": {
+    "profile-sheet": "/components/profileSheet/index"
+  }
 }

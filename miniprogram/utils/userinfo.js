@@ -29,7 +29,7 @@ export const queryUserInfo = async () => {
   // 1. 本地缓存（快速返回）
   const cached = wx.getStorageSync('userInfoSnapshot') || wx.getStorageSync('userInfo')
   const cachedOpenId = wx.getStorageSync('openId')
-  if (cached && cached.nickName && cached.avatarUrl) {
+  if (cached && cached.nickName) {
     return { openId: cachedOpenId || '', nickName: cached.nickName, avatarUrl: cached.avatarUrl }
   }
 

@@ -1,4 +1,4 @@
-const { queryUserInfo, updateUserInfo } = require('../../utils/userinfo')
+const { queryUserInfo } = require('../../utils/userinfo')
 
 Page({
   data: {
@@ -17,7 +17,7 @@ Page({
       const info = await queryUserInfo()
 
       // 如果有完整信息，直接展示
-      if (info && info.nickName && info.avatarUrl) {
+      if (info && info.nickName) {
         const userInfo = {
           nickName: info.nickName,
           avatarUrl: info.avatarUrl
@@ -57,44 +57,20 @@ Page({
       pendingAvatarUrl: this.data.userInfo ? this.data.userInfo.avatarUrl : ''
     })
   },
-  // 保存用户信息到云端
-  async saveUserInfoToCloud(nickName, userInfo = {}) {
-    try {
-      const payload = {
-        nickName,
-        avatarUrl: userInfo.avatarUrl || ''
-      }
-
-      const res = await updateUserInfo(payload)
-
-      if (res && res.success && res.data) {
-        const { openId, nickName: finalNickName, avatarUrl: finalAvatarUrl } = res.data
-        const mergedUserInfo = {
-          nickName: finalNickName || payload.nickName,
-          avatarUrl: finalAvatarUrl || payload.avatarUrl
-        }
-
-        this.setData({ userInfo: mergedUserInfo })
-        if (openId) {
-          this.setData({ openId })
-        }
-
-        wx.showToast({ title: '登录成功', icon: 'success' })
-      } else {
-        wx.showToast({ title: '保存失败', icon: 'none' })
-        console.error('保存用户信息失败:', res)
-      }
-    } catch (e) {
-      wx.showToast({ title: '登录失败', icon: 'none' })
-      console.error('登录流程异常:', e)
-    }
-  },
-
   // profileSheet 组件事件：保存
   onProfileConfirm(e) {
-    const { nickName, avatarUrl } = e.detail || {}
+    const { userInfo, openId } = e.detail || {}
     this.setData({ showProfileSheet: false, pendingAvatarUrl: '' })
-    this.saveUserInfoToCloud(nickName, { avatarUrl })
+
+    if (userInfo) {
+      this.setData({ userInfo })
+      wx.setStorageSync('userInfo', userInfo)
+    }
+
+    if (openId) {
+      this.setData({ openId })
+      wx.setStorageSync('openId', openId)
+    }
   },
 
   // profileSheet 组件事件：关闭

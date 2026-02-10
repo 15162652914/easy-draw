@@ -21,7 +21,10 @@ Page({
       { value: DRAW_TYPE.SEQUENCE, label: '顺序抽签' },
       { value: DRAW_TYPE.RANDOM, label: '随机抽选' },
       { value: DRAW_TYPE.GROUP, label: '分组抽签' }
-    ]
+    ],
+    // 昵称弹窗
+    showProfileSheet: false,
+    pendingProfileAction: ''
   },
 
 
@@ -94,14 +97,6 @@ Page({
     const userInfo = wx.getStorageSync('userInfo')
     if (userInfo) {
       this.setData({ userInfo })
-    } else {
-      wx.getUserProfile({
-        desc: '用于完善用户信息',
-        success: (res) => {
-          this.setData({ userInfo: res.userInfo })
-          wx.setStorageSync('userInfo', res.userInfo)
-        }
-      })
     }
   },
 
@@ -195,6 +190,19 @@ Page({
   },
 
   async createDraw() {
+    const { userInfo } = this.data
+
+    // 先校验是否有昵称，没有则弹出 profileSheet 让用户输入
+    if (!userInfo || !userInfo.nickName) {
+      this.openProfileSheet('create')
+      return
+    }
+
+    await this.doCreateDraw()
+  },
+
+  // 真正执行创建逻辑（假定已具备合法 userInfo）
+  async doCreateDraw() {
     const { title, options, expireDate, userInfo, maxParticipants, winnerQuota } = this.data
     
     // 验证表单
@@ -205,11 +213,6 @@ Page({
     
     if (options.length < 2) {
       wx.showToast({ title: '至少需要2个选项', icon: 'none' })
-      return
-    }
-    
-    if (!userInfo) {
-      wx.showToast({ title: '请先授权获取用户信息', icon: 'none' })
       return
     }
     
@@ -257,6 +260,40 @@ Page({
       wx.hideLoading()
       wx.showToast({ title: '创建失败，请重试', icon: 'none' })
       console.error('创建抽签失败:', error)
+    }
+  },
+
+  // 打开昵称编辑弹窗
+  openProfileSheet(action) {
+    this.setData({
+      showProfileSheet: true,
+      pendingProfileAction: action || ''
+    })
+  },
+
+  // 关闭昵称弹窗
+  onProfileSheetClose() {
+    this.setData({ showProfileSheet: false, pendingProfileAction: '' })
+  },
+
+  // 昵称弹窗确认
+  onProfileSheetConfirm(e) {
+    const { userInfo, openId } = e.detail || {}
+    const { pendingProfileAction } = this.data
+
+    this.setData({ showProfileSheet: false, pendingProfileAction: '' })
+
+    if (userInfo) {
+      this.setData({ userInfo })
+      wx.setStorageSync('userInfo', userInfo)
+    }
+
+    if (openId) {
+      wx.setStorageSync('openId', openId)
+    }
+
+    if (pendingProfileAction === 'create') {
+      this.doCreateDraw()
     }
   }
 })
