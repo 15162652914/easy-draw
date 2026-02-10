@@ -1,0 +1,28 @@
+<van-action-sheet
+  show="{{internalShow}}"
+  title="完善信息"
+  bind:close="onClose"
+  bind:cancel="onCancel"
+>
+  <view class="sheet-content">
+    <view class="avatar-wrap" wx:if="{{avatarUrl}}">
+      <image class="avatar" src="{{avatarUrl}}" mode="aspectFill" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">昵称</text>
+      <input
+        class="input"
+        placeholder="请输入昵称"
+        maxlength="20"
+        bindinput="onNickNameInput"
+      />
+    </view>
+
+    <button class="btn-primary" type="primary" bindtap="onConfirm">保存</button>
+
+    <view class="tip">
+      为保护隐私，微信可能只返回匿名头像，这里仅在本小程序内使用并保存您的昵称和头像。
+    </view>
+  </view>
+</van-action-sheet>

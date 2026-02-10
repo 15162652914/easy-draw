@@ -45,4 +45,12 @@
   <view class="footer">
     <text class="version">Version 1.2.0</text>
   </view>
+
+  <!-- 昵称头像完善弹窗 -->
+  <profile-sheet
+    show="{{showProfileSheet}}"
+    avatar-url="{{pendingAvatarUrl}}"
+    bind:confirm="onProfileConfirm"
+    bind:close="onProfileClose"
+  />
 </view>

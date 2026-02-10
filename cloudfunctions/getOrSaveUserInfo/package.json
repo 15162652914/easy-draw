@@ -1,5 +1,5 @@
 {
-  "name": "saveUserInfo",
+  "name": "getOrSaveUserInfo",
   "version": "1.0.0",
   "description": "cloud function: save user basic profile info",
   "main": "index.js",

@@ -137,10 +137,10 @@ export const closeDraw = async (data) => {
 // 说明：
 // - 仅提供能力，当前默认不在登录流程中自动调用
 // - 调用方可在获取用户授权后按需调用
-export const saveUserInfo = async (userInfo) => {
+export const getOrSaveUserInfo = async (userInfo) => {
   try {
     const result = await wx.cloud.callFunction({
-      name: 'saveUserInfo',
+      name: 'getOrSaveUserInfo',
       data: { userInfo }
     })
     return result.result
