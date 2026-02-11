@@ -89,13 +89,13 @@ Page({
     })
   },
 
-  about() {
+  onAboutSheetShow() {
     this.setData({
       showAboutSheet: true
     })
   },
 
-  privacyPolicy() {
+  onPrivacySheetShow() {
     this.setData({
       showPrivacySheet: true
     })
@@ -107,15 +107,6 @@ Page({
 
   onPrivacySheetClose() {
     this.setData({ showPrivacySheet: false })
-  },
-
-  userAgreement() {
-    wx.showModal({
-      title: '用户协议',
-      content:
-        '欢迎使用微信群抽签小程序\n\n1. 服务内容：\n   - 提供抽签创建、参与功能\n   - 提供抽签历史记录查询\n\n2. 用户义务：\n   - 遵守法律法规\n   - 不得使用本服务进行违法活动\n   - 不得干扰其他用户的正常使用\n\n3. 免责声明：\n   - 本服务仅作为工具使用\n   - 对于因使用本服务产生的任何争议，我们不承担责任\n\n4. 协议更新：\n   - 我们可能会不时更新本协议\n   - 继续使用本服务即表示您接受更新后的协议\n\n如有任何疑问，请联系我们。',
-      showCancel: false
-    })
   },
 
   clearCache() {

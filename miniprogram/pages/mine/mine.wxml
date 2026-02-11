@@ -31,12 +31,12 @@
       <text class="menu-text">联系客服</text>
       <van-icon name="arrow" />
     </button> -->
-    <view class="menu-item" bindtap="about">
+    <view class="menu-item" bindtap="onAboutSheetShow">
       <image class="menu-icon" src="/images/icons/about.png" />
       <text class="menu-text">关于我们</text>
       <van-icon name="arrow" />
     </view>
-    <view class="menu-item" bindtap="privacyPolicy">
+    <view class="menu-item" bindtap="onPrivacySheetShow">
       <image class="menu-icon" src="/images/icons/privacy.png" />
       <text class="menu-text">隐私协议</text>
       <van-icon name="arrow" />

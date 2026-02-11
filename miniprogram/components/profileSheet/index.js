@@ -18,7 +18,7 @@ Component({
 
   data: {
     internalShow: false,
-    nickName: '',
+    inputNickName: '',
     saving: false
   },
 
@@ -27,18 +27,18 @@ Component({
       this.setData({ internalShow: val })
       // 弹窗打开时，用外部传入的昵称作为初始值
       if (val) {
-        this.setData({ nickName: this.data.nickName || this.properties.nickName || '' })
+        this.setData({ inputNickName: this.data.inputNickName || this.properties.nickName || '' })
       }
     }
   },
 
   methods: {
     onNickNameInput(e) {
-      this.setData({ nickName: e.detail.value })
+      this.setData({ inputNickName: e.detail.value })
     },
 
     onClose() {
-      this.setData({ internalShow: false, nickName: '', saving: false })
+      this.setData({ internalShow: false, inputNickName: '', saving: false })
       this.triggerEvent('close')
     },
 
@@ -49,7 +49,7 @@ Component({
     async onConfirm() {
       if (this.data.saving) return
 
-      const nickName = (this.data.nickName || '').trim()
+      const nickName = (this.data.inputNickName || '').trim()
       if (!nickName) {
         wx.showToast({ title: '昵称不能为空', icon: 'none' })
         return
@@ -74,7 +74,7 @@ Component({
 
           wx.showToast({ title: '保存成功', icon: 'success' })
 
-          this.setData({ internalShow: false, nickName: '', saving: false })
+          this.setData({ internalShow: false, inputNickName: '', saving: false })
 
           // 通知父页面：已保存成功，并返回最终的用户信息和 openId（如果有）
           this.triggerEvent('confirm', {
