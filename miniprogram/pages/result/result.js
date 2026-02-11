@@ -131,6 +131,7 @@ Page({
     } else if (typeof draw.totalCount === 'number' && draw.totalCount > 0) {
       const hasOptions = Array.isArray(draw.options) && draw.options.length > 0
       // 当没有选项，或 totalCount 与选项数量不一致时，认为 totalCount 是真实上限
+      // 注意：options可能是对象数组，所以直接用length比较即可
       if (!hasOptions || draw.totalCount !== draw.options.length) {
         upperLimit = draw.totalCount
       }
@@ -162,11 +163,22 @@ Page({
   resolveResultText(draw, result) {
     if (result === null || result === undefined) return ''
     const opts = Array.isArray(draw.options) ? draw.options : []
+    
+    // 规范化选项格式：兼容旧格式（字符串数组）和新格式（对象数组）
+    const normalizedOpts = opts.map(opt => {
+      if (typeof opt === 'string') {
+        return opt
+      } else if (opt && typeof opt === 'object' && opt.text) {
+        return opt.text
+      }
+      return String(opt || '')
+    })
+    
     // 结果为数字（或数字字符串）时，尝试映射到选项文本（1-based）
     const n = typeof result === 'number' ? result : parseInt(result, 10)
     if (!isNaN(n)) {
       const idx = n - 1
-      if (idx >= 0 && idx < opts.length) return String(opts[idx])
+      if (idx >= 0 && idx < normalizedOpts.length) return String(normalizedOpts[idx])
     }
     // 其他情况，直接作为字符串展示
     return String(result)

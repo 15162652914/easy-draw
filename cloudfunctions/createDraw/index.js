@@ -68,10 +68,10 @@ exports.main = async (event, context) => {
         description: description || '',
         // 保存数值枚举类型（兼容旧字符串类型）
         type: typeof typeVal === 'number' ? typeVal : TYPE_MAP['sequence'],
-        options: options || [],
+        options: normalizedOptions, // 保存规范化后的选项对象数组
         // 当存在 options（任务分配）时，以 options.length 作为总数，避免参与人数超过任务数量
-        totalCount: (Array.isArray(options) && options.length > 0)
-          ? options.length
+        totalCount: (normalizedOptions.length > 0)
+          ? normalizedOptions.length
           : (totalCount || 10),
         lotsPool: lotsPool, // 预生成的签池，已被抽的设为null
         // 新增：最大参与人数（可选）。未设置则按 totalCount 或 options 长度限制。

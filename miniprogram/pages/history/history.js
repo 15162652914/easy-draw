@@ -159,10 +159,21 @@ Page({
   resolveResultText(draw, result) {
     if (result === null || result === undefined) return ''
     const opts = Array.isArray(draw.options) ? draw.options : []
+    
+    // 规范化选项格式：兼容旧格式（字符串数组）和新格式（对象数组）
+    const normalizedOpts = opts.map(opt => {
+      if (typeof opt === 'string') {
+        return opt
+      } else if (opt && typeof opt === 'object' && opt.text) {
+        return opt.text
+      }
+      return String(opt || '')
+    })
+    
     const n = typeof result === 'number' ? result : parseInt(result, 10)
     if (!isNaN(n)) {
       const idx = n - 1
-      if (idx >= 0 && idx < opts.length) return String(opts[idx])
+      if (idx >= 0 && idx < normalizedOpts.length) return String(normalizedOpts[idx])
     }
     return String(result)
   },

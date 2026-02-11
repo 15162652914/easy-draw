@@ -63,11 +63,18 @@
         >
           <input 
             class="option-input" 
-            value="{{item}}" 
+            value="{{item.text}}" 
             placeholder="请输入选项内容"
             data-index="{{index}}"
             bindinput="onOptionChange"
           />
+          <!-- 随机抽选模式下显示赢家勾选框 -->
+          <view wx:if="{{type===2}}" class="winner-checkbox" bindtap="toggleWinner" data-index="{{index}}">
+            <view class="checkbox {{item.isWinner ? 'checked' : ''}}">
+              <image wx:if="{{item.isWinner}}" src="/images/icons/check.png" class="check-icon-small" mode="aspectFit" />
+            </view>
+            <text class="checkbox-label">赢家</text>
+          </view>
           <view class="delete-btn" bindtap="deleteOption" data-index="{{index}}">
             <image src="/images/icons/delete.png" class="delete-icon" />
           </view>
@@ -104,7 +111,7 @@
         <text class="icon">🏆</text>
         <text class="label">赢家名额</text>
       </view>
-      <text class="tip">当设置赢家名额时，将优先分配“获胜”选项，达到名额后分配其他选项。</text>
+      <text class="tip">设置赢家名额后，系统会按公平概率分配赢家选项。请在选项列表中勾选赢家选项。</text>
       <input
         class="input"
         type="number"

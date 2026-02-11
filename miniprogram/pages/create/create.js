@@ -72,7 +72,7 @@ Page({
       const newT = await templateManager.addCustomTemplate({
         title,
         desc: templateDesc || '',
-        options,
+        options, // 保存完整的选项对象数组
         preferredType,
         maxParticipants: maxPartNum,
         winnerQuota: winnerNum
@@ -107,9 +107,26 @@ Page({
             const key = String(found.preferredType).toLowerCase()
             nextType = map[key] ?? nextType
           }
+          
+          // 规范化选项格式：兼容旧格式（字符串数组）和新格式（对象数组）
+          let normalizedOptions = []
+          if (Array.isArray(found.options)) {
+            normalizedOptions = found.options.map(opt => {
+              if (typeof opt === 'string') {
+                return { text: opt, isWinner: false }
+              } else if (opt && typeof opt === 'object') {
+                return { 
+                  text: opt.text || '', 
+                  isWinner: !!opt.isWinner 
+                }
+              }
+              return { text: '', isWinner: false }
+            })
+          }
+          
           this.setData({
             title: found.title,
-            options: found.options,
+            options: normalizedOptions,
             type: nextType,
             templateDesc: found.desc || '',
             // 模板里如有保存最大参与人数/赢家名额，则带入表单，便于二次使用
@@ -195,12 +212,19 @@ Page({
     const { index } = e.currentTarget.dataset
     const value = e.detail.value
     const options = [...this.data.options]
-    options[index] = value
+    options[index].text = value
     this.setData({ options })
   },
 
   addOption() {
-    const options = [...this.data.options, '']
+    const options = [...this.data.options, { text: '', isWinner: false }]
+    this.setData({ options })
+  },
+
+  toggleWinner(e) {
+    const { index } = e.currentTarget.dataset
+    const options = [...this.data.options]
+    options[index].isWinner = !options[index].isWinner
     this.setData({ options })
   },
 
@@ -251,7 +275,7 @@ Page({
     }
     
     // 过滤空选项
-    const validOptions = options.filter(option => option.trim())
+    const validOptions = options.filter(option => option.text && option.text.trim())
     if (validOptions.length < 2) {
       wx.showToast({ title: '至少需要2个非空选项', icon: 'none' })
       return
@@ -263,7 +287,7 @@ Page({
       const result = await createDraw({
         title,
         type: this.data.type,
-        options: validOptions,
+        options: validOptions, // 传递完整的选项对象数组
         creatorInfo: {
           // openId: wx.getStorageSync('openId'),
           nickName: userInfo.nickName,

@@ -64,18 +64,57 @@ exports.main = async (event, context) => {
         await transaction.rollback();
         return { success: false, data: {}, message: '无有效选项' };
       }
+      
+      // 规范化选项格式：兼容旧格式（字符串数组）和新格式（对象数组）
+      const normalizedOpts = opts.map(opt => {
+        if (typeof opt === 'string') {
+          return { text: opt, isWinner: false }
+        } else if (opt && typeof opt === 'object' && opt.text) {
+          return { text: opt.text, isWinner: !!opt.isWinner }
+        }
+        return { text: String(opt || ''), isWinner: false }
+      })
+      
+      // 确定赢家选项
+      let winnerOption = draw.winnerOption
+      if (!winnerOption) {
+        // 如果数据库未保存winnerOption，尝试从选项中查找
+        const markedWinner = normalizedOpts.find(opt => opt.isWinner)
+        if (markedWinner) {
+          winnerOption = markedWinner.text
+        } else {
+          const legacyWinner = normalizedOpts.find(opt => String(opt.text) === '获得名额')
+          winnerOption = legacyWinner ? legacyWinner.text : (normalizedOpts[0]?.text || null)
+        }
+      }
+      
       const winnerQuota = typeof draw.winnerQuota === 'number' && draw.winnerQuota > 0 ? draw.winnerQuota : 0;
       const winnersCount = typeof draw.winnersCount === 'number' ? draw.winnersCount : 0;
-      const winnerOption = draw.winnerOption || (opts.find(o => String(o) === '获得名额') || opts[0]);
 
       if (winnerQuota > 0 && winnersCount < winnerQuota) {
-        // 赢家名额未满，优先分配赢家选项
-        result = winnerOption;
+        // 动态概率：根据剩余赢家名额和剩余参与名额计算获胜概率
+        const remainingWinners = winnerQuota - winnersCount; // 剩余赢家名额
+        const remainingSlots = upperLimit - participants.length; // 剩余参与名额
+        
+        // 如果剩余赢家名额 >= 剩余参与名额，所有人都是赢家
+        const winProbability = remainingSlots > 0 
+          ? Math.min(remainingWinners / remainingSlots, 1) 
+          : 0;
+        
+        // 按概率随机决定是否获得赢家选项
+        if (Math.random() < winProbability) {
+          result = winnerOption;
+        } else {
+          // 未命中赢家，从其他选项中随机选择
+          const others = normalizedOpts.filter(opt => String(opt.text) !== String(winnerOption))
+          const pickFrom = others.length > 0 ? others : normalizedOpts
+          result = pickFrom[Math.floor(Math.random() * pickFrom.length)].text
+        }
       } else {
         // 赢家名额已满，随机分配其他选项
-        const others = opts.filter(o => String(o) !== String(winnerOption));
-        const pickFrom = others.length > 0 ? others : opts;
-        result = pickFrom[Math.floor(Math.random() * pickFrom.length)];
+        const others = normalizedOpts.filter(opt => String(opt.text) !== String(winnerOption))
+        const pickFrom = others.length > 0 ? others : normalizedOpts
+        result = pickFrom[Math.floor(Math.random() * pickFrom.length)].text
       }
     } else {
       // SEQUENCE / 其他：从签池随机弹出一个
@@ -124,7 +163,28 @@ exports.main = async (event, context) => {
     }
     // 若为 RANDOM 且命中赢家选项，则递增 winnersCount
     if (drawType === 2) {
-      const winnerOption = draw.winnerOption || (Array.isArray(draw.options) && (draw.options.find(o => String(o) === '获得名额') || draw.options[0]));
+      // 先获取winnerOption
+      let winnerOption = draw.winnerOption
+      if (!winnerOption) {
+        // 如果数据库未保存，尝试从选项中查找
+        const opts = Array.isArray(draw.options) ? draw.options : []
+        const normalizedOpts = opts.map(opt => {
+          if (typeof opt === 'string') {
+            return { text: opt, isWinner: false }
+          } else if (opt && typeof opt === 'object' && opt.text) {
+            return { text: opt.text, isWinner: !!opt.isWinner }
+          }
+          return { text: String(opt || ''), isWinner: false }
+        })
+        const markedWinner = normalizedOpts.find(opt => opt.isWinner)
+        if (markedWinner) {
+          winnerOption = markedWinner.text
+        } else {
+          const legacyWinner = normalizedOpts.find(opt => String(opt.text) === '获得名额')
+          winnerOption = legacyWinner ? legacyWinner.text : (normalizedOpts[0]?.text || null)
+        }
+      }
+      
       if (winnerOption && String(newParticipant.result) === String(winnerOption)) {
         updateData['winnersCount'] = (typeof draw.winnersCount === 'number' ? draw.winnersCount : 0) + 1;
       }
