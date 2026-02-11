@@ -53,18 +53,7 @@ exports.main = async (event, context) => {
     let result;
     const lotsPool = draw.lotsPool || [];
     const hasOptions = Array.isArray(draw.options) && draw.options.length > 0;
-    const nonNullIndexes = lotsPool
-      .map((v, idx) => (v !== null ? idx : -1))
-      .filter(idx => idx !== -1);
-
-    if (nonNullIndexes.length === 0) {
-      // 签池为空：自动置为 CLOSED(1)
-      await transaction.collection('draws').doc(drawId).update({ data: { status: 1, updateTime: db.serverDate() } });
-      await transaction.commit();
-      const msg = hasOptions ? '任务已分配完毕' : '抽签已结束';
-      return { success: false, data: {}, message: msg };
-    }
-
+    
     // 按类型决定分配策略
     const drawType = typeof draw.type === 'number' ? draw.type : 1; // 默认 sequence
     let pick = null;
@@ -90,6 +79,18 @@ exports.main = async (event, context) => {
       }
     } else {
       // SEQUENCE / 其他：从签池随机弹出一个
+      const nonNullIndexes = lotsPool
+        .map((v, idx) => (v !== null ? idx : -1))
+        .filter(idx => idx !== -1);
+      
+      if (nonNullIndexes.length === 0) {
+        // 签池为空：自动置为 CLOSED(1)
+        await transaction.collection('draws').doc(drawId).update({ data: { status: 1, updateTime: db.serverDate() } });
+        await transaction.commit();
+        const msg = hasOptions ? '任务已分配完毕' : '抽签已结束';
+        return { success: false, data: {}, message: msg };
+      }
+      
       pick = nonNullIndexes[Math.floor(Math.random() * nonNullIndexes.length)];
       result = lotsPool[pick];
     }
