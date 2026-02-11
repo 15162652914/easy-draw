@@ -6,7 +6,9 @@
       <text class="nickname">{{userInfo.nickName || '点击登录'}}</text>
       <text class="login-tip">{{userInfo ? '欢迎回来' : '登录以同步数据'}}</text>
     </view>
-    <image wx:if="{{userInfo}}" class="arrow-icon" src="/images/icons/arrow-right.png" />
+    <view class="arrow-wrapper" wx:if="{{userInfo}}">
+      <van-icon name="arrow" />
+    </view>
   </view>
   
   <!-- Menu -->
@@ -14,7 +16,7 @@
     <view class="menu-item" bindtap="viewHistory">
       <image class="menu-icon" src="/images/icons/history.png" />
       <text class="menu-text">我的抽签</text>
-      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+      <van-icon name="arrow" />
     </view>
   </view>
 
@@ -22,22 +24,22 @@
     <!-- <button class="menu-item" open-type="feedback">
       <image class="menu-icon" src="/images/icons/feedback.png" />
       <text class="menu-text">意见反馈</text>
-      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+      <van-icon name="arrow" />
     </button>
     <button class="menu-item" open-type="contact">
       <image class="menu-icon" src="/images/icons/contact.png" />
       <text class="menu-text">联系客服</text>
-      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+      <van-icon name="arrow" />
     </button> -->
     <view class="menu-item" bindtap="about">
       <image class="menu-icon" src="/images/icons/about.png" />
       <text class="menu-text">关于我们</text>
-      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+      <van-icon name="arrow" />
     </view>
     <view class="menu-item" bindtap="privacyPolicy">
       <image class="menu-icon" src="/images/icons/privacy.png" />
       <text class="menu-text">隐私协议</text>
-      <image class="arrow-icon" src="/images/icons/arrow-right.png" />
+      <van-icon name="arrow" />
     </view>
   </view>
 
@@ -49,7 +51,8 @@
   <!-- 昵称头像完善弹窗 -->
   <profile-sheet
     show="{{showProfileSheet}}"
-    avatar-url="{{pendingAvatarUrl}}"
+    avatar-url="{{userInfo.avatarUrl || ''}}"
+    nick-name="{{userInfo.nickName || ''}}"
     bind:confirm="onProfileConfirm"
     bind:close="onProfileClose"
   />

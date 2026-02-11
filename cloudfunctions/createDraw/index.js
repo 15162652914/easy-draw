@@ -4,7 +4,7 @@ const db = cloud.database();
 const _ = db.command;
 
 exports.main = async (event, context) => {
-  const { title, type, options, totalCount, groupId, maxParticipants, winnerQuota } = event;
+  const { title, type, options, totalCount, groupId, maxParticipants, winnerQuota, creatorInfo } = event;
   const wxContext = cloud.getWXContext();
   const openId = wxContext.OPENID;
   
@@ -44,6 +44,22 @@ exports.main = async (event, context) => {
       winnerOption = idx >= 0 ? options[idx] : options[0];
     }
 
+    // 组装创建人信息（用于结果页展示创建者头像和昵称）
+    let creatorInfoPayload = null;
+    if (creatorInfo && typeof creatorInfo === 'object') {
+      creatorInfoPayload = {
+        openId: creatorInfo.openId || openId,
+        nickName: creatorInfo.nickName || '',
+        avatarUrl: creatorInfo.avatarUrl || ''
+      };
+    } else {
+      creatorInfoPayload = {
+        openId,
+        nickName: '',
+        avatarUrl: ''
+      };
+    }
+
     const result = await db.collection('draws').add({
       data: {
         _openid: openId,
@@ -62,6 +78,8 @@ exports.main = async (event, context) => {
         winnerQuota: typeof winnerQuota === 'number' && winnerQuota > 0 ? winnerQuota : null,
         winnersCount: 0,
         winnerOption: winnerOption,
+        // 新增：创建人信息
+        creatorInfo: creatorInfoPayload,
         status: 0, // 0 = ongoing
         participants: [],
         groupId: groupId || '',

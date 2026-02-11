@@ -82,6 +82,7 @@
       <profile-sheet
         show="{{showProfileSheet}}"
         avatar-url="{{userInfo.avatarUrl || ''}}"
+        nick-name="{{userInfo.nickName || ''}}"
         bind:confirm="onProfileSheetConfirm"
         bind:close="onProfileSheetClose"
       />

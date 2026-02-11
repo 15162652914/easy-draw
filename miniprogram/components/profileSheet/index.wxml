@@ -15,6 +15,7 @@
         class="input"
         placeholder="请输入昵称"
         maxlength="20"
+        value="{{nickName}}"
         bindinput="onNickNameInput"
       />
     </view>

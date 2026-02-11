@@ -265,7 +265,7 @@ Page({
         type: this.data.type,
         options: validOptions,
         creatorInfo: {
-          openId: wx.getStorageSync('openId'),
+          // openId: wx.getStorageSync('openId'),
           nickName: userInfo.nickName,
           avatarUrl: userInfo.avatarUrl
         },

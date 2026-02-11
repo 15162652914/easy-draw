@@ -5,7 +5,6 @@ Page({
     userInfo: null,
     openId: '',
     showProfileSheet: false,
-    pendingAvatarUrl: '',
     showAboutSheet: false,
     showPrivacySheet: false
   },
@@ -36,8 +35,7 @@ Page({
       // 如果需要手动补充昵称，则弹出弹窗
       if (info && info.needManual) {
         this.setData({
-          showProfileSheet: true,
-          pendingAvatarUrl: info.avatarUrl || ''
+          showProfileSheet: true
         })
         return
       }
@@ -55,14 +53,13 @@ Page({
   // 登录流程
   login() {
     this.setData({
-      showProfileSheet: true,
-      pendingAvatarUrl: this.data.userInfo ? this.data.userInfo.avatarUrl : ''
+      showProfileSheet: true
     })
   },
   // profileSheet 组件事件：保存
   onProfileConfirm(e) {
     const { userInfo, openId } = e.detail || {}
-    this.setData({ showProfileSheet: false, pendingAvatarUrl: '' })
+    this.setData({ showProfileSheet: false })
 
     if (userInfo) {
       this.setData({ userInfo })
@@ -77,7 +74,7 @@ Page({
 
   // profileSheet 组件事件：关闭
   onProfileClose() {
-    this.setData({ showProfileSheet: false, pendingAvatarUrl: '' })
+    this.setData({ showProfileSheet: false })
   },
 
   createNewDraw() {

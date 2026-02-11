@@ -9,6 +9,10 @@ Component({
     avatarUrl: {
       type: String,
       value: ''
+    },
+    nickName: {
+      type: String,
+      value: ''
     }
   },
 
@@ -21,6 +25,10 @@ Component({
   observers: {
     show(val) {
       this.setData({ internalShow: val })
+      // 弹窗打开时，用外部传入的昵称作为初始值
+      if (val) {
+        this.setData({ nickName: this.data.nickName || this.properties.nickName || '' })
+      }
     }
   },
 

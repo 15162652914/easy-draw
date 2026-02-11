@@ -42,9 +42,7 @@
   opacity: 0.8;
 }
 
-.arrow-icon {
-  width: 36rpx;
-  height: 36rpx;
+.arrow-wrapper {
   opacity: 0.8;
 }
 
