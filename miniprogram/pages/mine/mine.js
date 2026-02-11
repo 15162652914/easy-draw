@@ -5,7 +5,9 @@ Page({
     userInfo: null,
     openId: '',
     showProfileSheet: false,
-    pendingAvatarUrl: ''
+    pendingAvatarUrl: '',
+    showAboutSheet: false,
+    showPrivacySheet: false
   },
   onLoad() {
     this.checkUserInfo()
@@ -91,20 +93,23 @@ Page({
   },
 
   about() {
-    wx.showModal({
-      title: '关于我们',
-      content: '微信群抽签小程序\n版本 1.0.0\n\n一个简单易用的微信群抽签工具，支持创建、参与抽签和查看历史记录。',
-      showCancel: false
+    this.setData({
+      showAboutSheet: true
     })
   },
 
   privacyPolicy() {
-    wx.showModal({
-      title: '隐私协议',
-      content:
-        '我们重视您的隐私保护\n\n1. 我们收集的信息：\n   - 用户头像、昵称等基本信息\n   - 抽签相关的操作记录\n\n2. 信息使用方式：\n   - 用于展示用户信息\n   - 用于抽签功能的正常运行\n\n3. 信息保护：\n   - 我们会保护您的个人信息安全\n   - 不会将信息用于其他用途\n\n感谢您的信任与支持！',
-      showCancel: false
+    this.setData({
+      showPrivacySheet: true
     })
+  },
+
+  onAboutSheetClose() {
+    this.setData({ showAboutSheet: false })
+  },
+
+  onPrivacySheetClose() {
+    this.setData({ showPrivacySheet: false })
   },
 
   userAgreement() {

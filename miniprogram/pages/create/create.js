@@ -284,7 +284,7 @@ Page({
         // 创建成功后先进入参与页，由参与页抽签完再进入结果页
         setTimeout(() => {
           wx.navigateTo({
-            url: `/pages/draw/draw?drawId=${result.data.drawId}`
+            url: `/pages/result/result?drawId=${result.data.drawId}`
           })
         }, 1500)
       } else {

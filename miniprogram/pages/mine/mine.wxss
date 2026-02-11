@@ -112,3 +112,44 @@
   font-size: 24rpx;
   color: #c0c4cc;
 }
+
+/* 通用信息弹层（关于我们 / 隐私协议） */
+.info-sheet-scroll {
+  max-height: 60vh;
+  padding: 24rpx 32rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.info-sheet-content {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.7;
+}
+
+.info-sheet-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.info-sheet-subtitle {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.info-sheet-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.7;
+  margin-top: 24rpx;
+}
+
+.info-sheet-section-title {
+  margin-bottom: 16rpx;
+  font-weight: 600;
+}
+
+.info-sheet-section {
+  margin: 16rpx 0 12rpx;
+}

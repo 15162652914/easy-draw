@@ -173,7 +173,7 @@ Page({
   onShareAppMessage() {
     const { drawId, drawDetail } = this.data
     const title = drawDetail?.title ? `邀请你参与抽签：${drawDetail.title}` : '快来参与这个好玩的抽签'
-    const path = `/pages/draw/draw?drawId=${drawId}`
+    const path = `/pages/result/result?drawId=${drawId}`
     
     return {
       title: title,

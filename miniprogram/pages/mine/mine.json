@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "我的",
   "usingComponents": {
-    "profile-sheet": "/components/profileSheet/index"
+    "profile-sheet": "/components/profileSheet/index",
+    "van-action-sheet": "@vant/weapp/action-sheet/index"
   }
 }

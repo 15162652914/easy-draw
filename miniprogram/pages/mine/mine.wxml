@@ -1,6 +1,6 @@
 <view class="container">
   <!-- User Info -->
-  <view class="user-info-card" bindtap="{{!userInfo ? 'login' : ''}}">
+  <view class="user-info-card" bindtap="login">
     <image class="avatar" src="{{userInfo.avatarUrl || '/images/icons/avatar.png'}}" mode="aspectFill" />
     <view class="user-details">
       <text class="nickname">{{userInfo.nickName || '点击登录'}}</text>
@@ -29,12 +29,12 @@
       <text class="menu-text">联系客服</text>
       <image class="arrow-icon" src="/images/icons/arrow-right.png" />
     </button> -->
-    <view class="menu-item" bindtap="showAbout">
+    <view class="menu-item" bindtap="about">
       <image class="menu-icon" src="/images/icons/about.png" />
       <text class="menu-text">关于我们</text>
       <image class="arrow-icon" src="/images/icons/arrow-right.png" />
     </view>
-    <view class="menu-item" bindtap="showPrivacyPolicy">
+    <view class="menu-item" bindtap="privacyPolicy">
       <image class="menu-icon" src="/images/icons/privacy.png" />
       <text class="menu-text">隐私协议</text>
       <image class="arrow-icon" src="/images/icons/arrow-right.png" />
@@ -53,4 +53,47 @@
     bind:confirm="onProfileConfirm"
     bind:close="onProfileClose"
   />
+
+  <!-- 关于我们 - Vant Action Sheet -->
+  <van-action-sheet
+    show="{{showAboutSheet}}"
+    title="关于我们"
+    bind:close="onAboutSheetClose"
+  >
+    <scroll-view scroll-y class="info-sheet-scroll">
+      <view class="info-sheet-content">
+        <view class="info-sheet-title">微信群抽签小程序</view>
+        <view class="info-sheet-subtitle">版本 1.0.0</view>
+        <view class="info-sheet-text">
+          一个简单易用的微信群抽签工具，支持创建抽签、参与抽签和查看历史记录，帮助你在群里快速、公平地完成各种抽签活动。
+        </view>
+      </view>
+    </scroll-view>
+  </van-action-sheet>
+
+  <!-- 隐私协议 - Vant Action Sheet -->
+  <van-action-sheet
+    show="{{showPrivacySheet}}"
+    title="隐私协议"
+    bind:close="onPrivacySheetClose"
+  >
+    <scroll-view scroll-y class="info-sheet-scroll">
+      <view class="info-sheet-content info-sheet-text">
+        <view class="info-sheet-section-title">我们重视您的隐私保护</view>
+        <view class="info-sheet-section">1. 我们收集的信息：</view>
+        <view>- 用户头像、昵称等基本资料</view>
+        <view class="info-sheet-section">- 抽签相关的操作记录（如创建、参与、结果等）</view>
+
+        <view class="info-sheet-section">2. 信息使用方式：</view>
+        <view>- 用于在小程序内展示您的头像和昵称</view>
+        <view>- 用于保证抽签功能的正常运行和历史记录查询</view>
+
+        <view class="info-sheet-section">3. 信息保护：</view>
+        <view>- 我们仅在本小程序业务范围内使用您的信息</view>
+        <view>- 不会向未授权的第三方提供您的个人信息</view>
+
+        <view class="info-sheet-section">感谢您的信任与支持！</view>
+      </view>
+    </scroll-view>
+  </van-action-sheet>
 </view>
