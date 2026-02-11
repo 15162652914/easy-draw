@@ -5,6 +5,8 @@ const { DRAW_TYPE, DRAW_TYPE_TEXT } = require('../../utils/constants')
 Page({
   data: {
     title: '',
+    // 模板描述，仅用于展示在首页模板列表，可选
+    templateDesc: '',
     options: [],
     expireDate: '',
     today: '',
@@ -34,7 +36,7 @@ Page({
   },
 
   async saveTemplate() {
-    const { title, options, type } = this.data
+    const { title, options, type, maxParticipants, winnerQuota, templateDesc } = this.data
     if (!title) {
       wx.showToast({ title: '请输入模板标题', icon: 'none' })
       return
@@ -52,9 +54,29 @@ Page({
       [DRAW_TYPE.GROUP]: 'group'
     }
     const preferredType = typeMapRev[type] || 'sequence'
+
+    // 规范化参与人数和赢家名额（可选）
+    let maxPartNum
+    if (maxParticipants) {
+      const n = parseInt(maxParticipants, 10)
+      if (!isNaN(n) && n > 0) maxPartNum = n
+    }
+
+    let winnerNum
+    if (winnerQuota) {
+      const n = parseInt(winnerQuota, 10)
+      if (!isNaN(n) && n > 0) winnerNum = n
+    }
     
     try {
-      const newT = await templateManager.addCustomTemplate({ title, desc: '', options, preferredType })
+      const newT = await templateManager.addCustomTemplate({
+        title,
+        desc: templateDesc || '',
+        options,
+        preferredType,
+        maxParticipants: maxPartNum,
+        winnerQuota: winnerNum
+      })
       if (newT) {
         wx.showToast({ title: '已保存为自定义模板', icon: 'success' })
       } else {
@@ -85,7 +107,15 @@ Page({
             const key = String(found.preferredType).toLowerCase()
             nextType = map[key] ?? nextType
           }
-          this.setData({ title: found.title, options: found.options, type: nextType })
+          this.setData({
+            title: found.title,
+            options: found.options,
+            type: nextType,
+            templateDesc: found.desc || '',
+            // 模板里如有保存最大参与人数/赢家名额，则带入表单，便于二次使用
+            maxParticipants: found.maxParticipants ? String(found.maxParticipants) : '',
+            winnerQuota: found.winnerQuota ? String(found.winnerQuota) : ''
+          })
         }
       }).catch(err => {
         console.error('查找模板失败', err)
@@ -98,6 +128,10 @@ Page({
     if (userInfo) {
       this.setData({ userInfo })
     }
+  },
+
+  onTemplateDescChange(e) {
+    this.setData({ templateDesc: e.detail.value })
   },
 
   onTitleChange(e) {

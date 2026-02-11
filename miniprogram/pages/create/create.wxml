@@ -17,6 +17,21 @@
   <view class="card">
     <view class="form-item">
       <view class="label-wrapper">
+        <text class="icon">📄</text>
+        <text class="label">模板描述（可选）</text>
+      </view>
+      <input
+        class="input"
+        placeholder="给模板写一句说明，方便下次识别"
+        value="{{templateDesc}}"
+        bindinput="onTemplateDescChange"
+      />
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="form-item">
+      <view class="label-wrapper">
         <text class="icon">⚙️</text>
         <text class="label">抽签方式</text>
         <van-icon name="info-o" size="18px" color="#667eea" custom-style="margin-left: 10rpx;" bind:click="showTypeHelp" />

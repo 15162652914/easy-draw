@@ -31,5 +31,10 @@ Page({
   selectTemplate(e) {
     const templateId = e.currentTarget.dataset.templateId
     wx.navigateTo({ url: `/pages/create/create?templateId=${templateId}` })
+  },
+
+  // 从首页进入空白模板，用户自行输入标题和选项
+  createCustomDraw() {
+    wx.navigateTo({ url: '/pages/create/create' })
   }
 })

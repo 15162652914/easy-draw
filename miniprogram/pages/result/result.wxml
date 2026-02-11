@@ -26,7 +26,9 @@
       </view>
       <view class="info-body">
         <text>时间：{{drawDetail.createTimeFormatted}}</text>
-        <text>参与：{{drawDetail.participantCount}} / {{drawDetail.upperLimit}}</text>
+        <text>
+          参与：{{drawDetail.participantCount}}{{drawDetail.upperLimit ? (' / ' + drawDetail.upperLimit) : ''}}
+        </text>
       </view>
     </view>
 

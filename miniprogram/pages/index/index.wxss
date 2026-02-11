@@ -38,6 +38,7 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 24rpx;
+  margin-bottom: 24rpx;
 }
 
 .template-card {
@@ -83,5 +84,10 @@
   font-size: 24rpx;
   color: #888;
   line-height: 1.5;
+}
+
+/* 空白模板样式稍作强调 */
+.blank-template {
+  border: 2rpx dashed #667eea;
 }
 

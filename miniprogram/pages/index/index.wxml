@@ -5,6 +5,18 @@
     <view class="subtitle">快速、公正、趣味的在线抽签工具</view>
   </view>
 
+  <!-- Blank Template Entry -->
+  <view class="template-section-title">从空白开始创建</view>
+  <view class="template-list">
+    <view class="template-card blank-template" bindtap="createCustomDraw">
+      <view class="template-icon">✏️</view>
+      <view class="template-content">
+        <text class="template-title">空白模板</text>
+        <text class="template-desc">从零开始，自定义抽签内容</text>
+      </view>
+    </view>
+  </view>
+
   <!-- Template List -->
   <view class="template-section-title">或从模板快速创建</view>
   <view class="template-list">

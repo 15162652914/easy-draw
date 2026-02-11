@@ -5,9 +5,22 @@ const DEFAULT_TEMPLATES = require('./templates')
 
 const STORAGE_CUSTOM_KEY = 'customTemplates'
 
+// 自定义模板可用的随机图标池
+const ICON_POOL = ['✨', '⭐', '🎯', '📌', '🧩', '🎲', '📋', '🎉', '📝', '🔖']
+
+function pickRandomIcon() {
+  const idx = Math.floor(Math.random() * ICON_POOL.length)
+  return ICON_POOL[idx] || '✨'
+}
+
+// 是否启用模板的云端同步（列表 & 新增）。
+// 目前按你的需求默认关闭，只使用本地存储；
+// 如需恢复云端，同步将此值改为 true 即可。
+const ENABLE_TEMPLATE_CLOUD_SYNC = false
+
 // 尝试优先使用云端存储（需要在微信开发者工具中部署云函数）
 function isCloudAvailable() {
-  return !!(wx.cloud && wx.cloud.callFunction)
+  return ENABLE_TEMPLATE_CLOUD_SYNC && !!(wx.cloud && wx.cloud.callFunction)
 }
 
 function loadCustomTemplatesLocal() {
@@ -38,7 +51,16 @@ module.exports = {
       try {
         const resp = await wx.cloud.callFunction({ name: 'listTemplates' })
         if (resp && resp.result && resp.result.success) {
-          custom = resp.result.data.map(t => ({ templateId: t.templateId, title: t.title, desc: t.desc, options: t.options, preferredType: t.preferredType }))
+          custom = resp.result.data.map(t => ({
+            templateId: t.templateId,
+            title: t.title,
+            desc: t.desc,
+            options: t.options,
+            preferredType: t.preferredType,
+            maxParticipants: t.maxParticipants,
+            winnerQuota: t.winnerQuota,
+            icon: t.icon || pickRandomIcon()
+          }))
         } else {
           custom = loadCustomTemplatesLocal()
         }
@@ -56,21 +78,36 @@ module.exports = {
       title: t.title,
       desc: t.desc,
       options: t.options,
-      preferredType: t.preferredType
+      preferredType: t.preferredType,
+      maxParticipants: t.maxParticipants,
+      winnerQuota: t.winnerQuota,
+      icon: t.icon || pickRandomIcon()
     }))
 
     return [...DEFAULT_TEMPLATES, ...custom]
   },
 
   // 添加自定义模板，优先写入云端（返回 Promise -> new template）
-  async addCustomTemplate({ title, desc = '', options = [], preferredType = 'sequence' }) {
+  async addCustomTemplate({ title, desc = '', options = [], preferredType = 'sequence', maxParticipants, winnerQuota }) {
     if (!title || !Array.isArray(options) || options.length < 1) return null
+
+    // 规范化可选数值字段
+    const payload = {
+      title,
+      desc,
+      options,
+      preferredType,
+      maxParticipants: typeof maxParticipants === 'number' ? maxParticipants : undefined,
+      winnerQuota: typeof winnerQuota === 'number' ? winnerQuota : undefined,
+      icon: pickRandomIcon()
+    }
+
     if (isCloudAvailable()) {
       try {
-        const resp = await wx.cloud.callFunction({ name: 'createTemplate', data: { title, desc, options, preferredType } })
+        const resp = await wx.cloud.callFunction({ name: 'createTemplate', data: payload })
         if (resp && resp.result && resp.result.success) {
           const templateId = resp.result.data.templateId
-          const newT = { templateId: templateId, title, desc, options, preferredType }
+          const newT = { templateId: templateId, ...payload }
           return newT
         }
       } catch (e) {
@@ -80,7 +117,7 @@ module.exports = {
 
     // 本地保存（id 使用本地时间戳）
     const templateId = Date.now()
-    const newT = { templateId, title, desc, options, preferredType }
+    const newT = { templateId, ...payload }
     const list = loadCustomTemplatesLocal()
     list.push(newT)
     saveCustomTemplatesLocal(list)

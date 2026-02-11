@@ -105,15 +105,23 @@ Page({
     draw.statusText = DRAW_STATUS_TEXT[draw.status] || ''
     draw.statusClass = draw.status === DRAW_STATUS.ONGOING ? 'ongoing' : 'closed'
 
-    // 参与人数与上限展示：优先使用 maxParticipants，其次 totalCount，最后 options.length
+    // 参与人数与上限展示：
+    // - 首选 maxParticipants（显式“最大参与人数”配置）
+    // - 其次在无 options 时使用 totalCount（如数字签池）
+    // - 否则视为不限人数，仅展示当前参与人数
     draw.participantCount = Array.isArray(draw.participants) ? draw.participants.length : 0
-    draw.upperLimit = (typeof draw.maxParticipants === 'number' && draw.maxParticipants > 0)
-      ? draw.maxParticipants
-      : (typeof draw.totalCount === 'number' && draw.totalCount > 0)
-        ? draw.totalCount
-        : Array.isArray(draw.options)
-          ? draw.options.length
-          : 0
+
+    let upperLimit = 0
+    if (typeof draw.maxParticipants === 'number' && draw.maxParticipants > 0) {
+      upperLimit = draw.maxParticipants
+    } else if (typeof draw.totalCount === 'number' && draw.totalCount > 0) {
+      const hasOptions = Array.isArray(draw.options) && draw.options.length > 0
+      // 当没有选项，或 totalCount 与选项数量不一致时，认为 totalCount 是真实上限
+      if (!hasOptions || draw.totalCount !== draw.options.length) {
+        upperLimit = draw.totalCount
+      }
+    }
+    draw.upperLimit = upperLimit
 
     if (draw.participants) {
       draw.participants.forEach(p => {
@@ -214,7 +222,9 @@ Page({
     }
 
     let resultText = `抽签主题：${drawDetail.title}\n`
-    const upper = drawDetail.upperLimit || drawDetail.totalCount || (drawDetail.options?.length || 0)
+    const upper = (typeof drawDetail.upperLimit === 'number' && drawDetail.upperLimit > 0)
+      ? drawDetail.upperLimit
+      : 0
     resultText += `参与人数：${drawDetail.participants.length}${upper ? ' / ' + upper : ''}\n`
     resultText += '-------------------\n'
 
