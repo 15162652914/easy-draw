@@ -155,7 +155,7 @@ Page({
     try {
       const result = await joinDraw({
         drawId: drawId,
-        nickname: userInfo.nickName,
+        nickName: userInfo.nickName,
         avatar: userInfo.avatarUrl
       })
       
@@ -178,7 +178,7 @@ Page({
         const updatedDetail = Object.assign({}, drawDetail)
         const participant = {
           openId: wx.getStorageSync('openId'),
-          nickname: userInfo.nickName,
+          nickName: userInfo.nickName,
           avatar: userInfo.avatarUrl,
           result: result.data?.result ?? null,
           resultText: this.resolveResultText(updatedDetail, result.data?.result ?? null),

@@ -95,11 +95,11 @@ exports.main = async (event, context) => {
     }
 
     // 4. 获取用户信息（事务外读取 users，不影响并发安全）
-    let userInfo = { nickname: '', avatar: '' };
+    let userInfo = { nickName: '', avatar: '' };
     try {
       const userResult = await db.collection('users').doc(openId).get();
       if (userResult.data) {
-        userInfo.nickname = userResult.data.nickName || userResult.data.nickname || '';
+        userInfo.nickName = userResult.data.nickName || '';
         userInfo.avatar = userResult.data.avatarUrl || userResult.data.avatar || '';
       }
     } catch (e) {}
@@ -107,7 +107,7 @@ exports.main = async (event, context) => {
     // 5. 写入参与者并标记签池项为空（事务内一次性更新）
     const newParticipant = {
       openId: openId,
-      nickname: event.nickname || userInfo.nickname || '匿名用户',
+      nickName: event.nickName || userInfo.nickName || '匿名用户',
       avatar: event.avatar || userInfo.avatar || '',
       result: result,
       drawTime: db.serverDate()

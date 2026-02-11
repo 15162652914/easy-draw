@@ -38,7 +38,7 @@
         <view class="avatars-grid">
           <view wx:for="{{drawDetail.participants}}" wx:key="openId" class="avatar-item">
             <image src="{{item.avatar || '../../images/avatar.png'}}" class="img" mode="aspectFill" />
-            <text class="avatar-name">{{item.nickname}}</text>
+            <text class="avatar-name">{{item.nickName}}</text>
             <text class="avatar-result">{{item.resultText || item.result}}</text>
             <text wx:if="{{item.openId === wx.getStorageSync('openId')}}" class="my-badge">我</text>
           </view>

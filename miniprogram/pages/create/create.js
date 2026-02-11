@@ -237,7 +237,7 @@ Page({
 
   // 真正执行创建逻辑（假定已具备合法 userInfo）
   async doCreateDraw() {
-    const { title, options, expireDate, userInfo, maxParticipants, winnerQuota } = this.data
+    const { title, options, expireDate, userInfo, maxParticipants, winnerQuota, templateDesc } = this.data
     
     // 验证表单
     if (!title) {
@@ -269,6 +269,8 @@ Page({
           nickName: userInfo.nickName,
           avatarUrl: userInfo.avatarUrl
         },
+        // 抽签描述信息（使用页面中的描述输入）
+        description: templateDesc || '',
         expireTime: expireDate ? new Date(expireDate).getTime() : null,
         // 传递最大参与人数（可选）
         maxParticipants: maxParticipants ? parseInt(maxParticipants, 10) : undefined,

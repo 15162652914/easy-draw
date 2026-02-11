@@ -45,7 +45,7 @@
 
   <!-- Footer -->
   <view class="footer">
-    <text class="version">Version 1.2.0</text>
+    <!-- <text class="version">Version 1.2.0</text> -->
   </view>
 
   <!-- 昵称头像完善弹窗 -->

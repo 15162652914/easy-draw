@@ -4,7 +4,7 @@ const db = cloud.database();
 const _ = db.command;
 
 exports.main = async (event, context) => {
-  const { title, type, options, totalCount, groupId, maxParticipants, winnerQuota, creatorInfo } = event;
+  const { title, type, options, totalCount, groupId, maxParticipants, winnerQuota, creatorInfo, description } = event;
   const wxContext = cloud.getWXContext();
   const openId = wxContext.OPENID;
   
@@ -64,6 +64,8 @@ exports.main = async (event, context) => {
       data: {
         _openid: openId,
         title: title || '未命名抽签',
+        // 抽签描述信息
+        description: description || '',
         // 保存数值枚举类型（兼容旧字符串类型）
         type: typeof typeVal === 'number' ? typeVal : TYPE_MAP['sequence'],
         options: options || [],

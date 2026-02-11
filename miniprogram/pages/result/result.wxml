@@ -15,8 +15,8 @@
         <view class="creator-block">
           <image src="{{drawDetail.creatorInfo.avatarUrl || '../../images/avatar.png'}}" class="creator-avatar" />
           <view class="creator-meta">
-            <text class="title">{{drawDetail.title}}</text>
-            <text class="creator-name">由 {{drawDetail.creatorInfo.nickName || '匿名'}} 创建</text>
+            <view class="title">{{drawDetail.title}}</view>
+            <view class="name">由 {{drawDetail.creatorInfo.nickName || '匿名'}} 创建</view>
           </view>
         </view>
         <view class="tags">
@@ -24,11 +24,12 @@
           <text class="tag status-tag status-{{drawDetail.statusClass}}">{{drawDetail.statusText}}</text>
         </view>
       </view>
-      <view class="info-body">
+      <view class="info-body info-desc">
+        <text>描述：{{drawDetail.description || '暂无描述'}}</text>
+      </view>
+      <view class="info-body info-meta">
         <text>时间：{{drawDetail.createTimeFormatted}}</text>
-        <text>
-          参与：{{drawDetail.participantCount}}{{drawDetail.upperLimit ? (' / ' + drawDetail.upperLimit) : ''}}
-        </text>
+        <text>参与：{{drawDetail.participantCount}}{{drawDetail.upperLimit ? (' / ' + drawDetail.upperLimit) : ''}}</text>
       </view>
     </view>
 
@@ -51,7 +52,7 @@
           <view class="group-members">
             <view wx:for="{{drawDetail.groupedParticipants[groupName]}}" wx:key="openId" class="member-item">
               <image src="{{item.avatar}}" class="avatar-small"></image>
-              <text class="member-name">{{item.nickname}}</text>
+              <text class="member-name">{{item.nickName}}</text>
               <text class="member-result">{{item.result}}</text>
             </view>
           </view>
@@ -62,7 +63,7 @@
         <view wx:for="{{drawDetail.participants}}" wx:key="openId" class="result-item {{item.openId === openId ? 'my-entry' : ''}}">
           <view class="participant-info">
             <image src="{{item.avatar}}" class="avatar-small" />
-            <text class="nickname">{{item.nickname}}</text>
+            <text class="nickname">{{item.nickName}}</text>
           </view>
           <view class="result-value-item">{{item.resultText || item.result}}</view>
         </view>

@@ -49,7 +49,7 @@
       <view class="draw-body">
         <view class="info-line">
           <image class="info-icon" src="/images/icons/user.png" />
-          <text class="info-text">创建者: {{item.participants[0].nickname}}</text>
+          <text class="info-text">创建者: {{item.creatorInfo.nickName}}</text>
         </view>
         <view class="info-line">
           <image class="info-icon" src="/images/icons/time.png" />

@@ -47,6 +47,7 @@
   font-weight: bold;
   color: #333;
   max-width: 70%;
+  line-height: 1.4;
 }
 
 .info-card .tags {
@@ -84,6 +85,10 @@
   justify-content: space-between;
 }
 
+.info-card .info-body + .info-body {
+  margin-top: 12rpx;
+}
+
 .my-result-card {
   text-align: center;
 }
@@ -111,21 +116,27 @@
 
 .creator-block {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex: 1;
 }
 .creator-avatar {
+  flex-shrink: 0;
   width: 84rpx;
   height: 84rpx;
   border-radius: 50%;
   margin-right: 20rpx;
 }
+.creator-meta {
+  flex: 1;
+}
 .creator-meta .title {
   font-size: 34rpx;
   font-weight: bold;
 }
-.creator-name {
+.creator-meta .name {
   font-size: 24rpx;
   color: #888;
+  margin-top: 6rpx;
 }
 
 .card-title {

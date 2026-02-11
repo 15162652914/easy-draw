@@ -139,6 +139,8 @@ Page({
 
     if (draw.participants) {
       draw.participants.forEach(p => {
+        // 统一参与者昵称字段为 nickName
+        p.nickName = p.nickName || ''
         p.drawTimeFormatted = formatTime(p.drawTime)
         p.resultText = this.resolveResultText(draw, p.result)
       })
@@ -245,13 +247,16 @@ Page({
     if (drawDetail.type === 'group') {
       for (const groupName in drawDetail.groupedParticipants) {
         resultText += `【${groupName}】\n`
-        const members = drawDetail.groupedParticipants[groupName].map(p => p.nickname).join('、')
+        const members = drawDetail.groupedParticipants[groupName]
+          .map(p => p.nickName || '')
+          .join('、')
         resultText += `${members}\n`
       }
     } else {
       drawDetail.participants.forEach(p => {
         const value = p.resultText || p.result
-        resultText += `${p.nickname} -> ${value}\n`
+        const name = p.nickName || ''
+        resultText += `${name} -> ${value}\n`
       })
     }
 
@@ -301,7 +306,7 @@ Page({
     try {
       const result = await joinDraw({
         drawId: drawId,
-        nickname: userInfo.nickName,
+        nickName: userInfo.nickName,
         avatar: userInfo.avatarUrl
       })
 
@@ -328,7 +333,7 @@ Page({
       const rawResult = result.data?.result ?? null
       const participant = {
         openId,
-        nickname: userInfo.nickName,
+        nickName: userInfo.nickName,
         avatar: userInfo.avatarUrl,
         result: rawResult,
         resultText: this.resolveResultText(updatedDetail, rawResult),
