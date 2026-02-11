@@ -280,11 +280,11 @@ Page({
       
       if (result.success) {
         wx.showToast({ title: '创建成功', icon: 'success' })
-        
-        // 跳转到结果页面，传递抽签ID
+
+        // 创建成功后先进入参与页，由参与页抽签完再进入结果页
         setTimeout(() => {
           wx.navigateTo({
-            url: `/pages/result/result?drawId=${result.data.drawId}`
+            url: `/pages/draw/draw?drawId=${result.data.drawId}`
           })
         }, 1500)
       } else {
