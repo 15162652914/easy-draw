@@ -53,32 +53,41 @@
         <text class="icon">🗳️</text>
         <text class="label">抽签选项</text>
       </view>
-      <text class="tip">点击选项可编辑，点击右侧按钮可删除</text>
+      <view class="tip">
+        <text>点击选项可编辑，左滑可删除；</text>
+        <text wx:if="{{type===2}}">勾选的选项将被视为赢家选项</text>
+      </view>
       
       <view class="options-list">
-        <view 
+        <van-swipe-cell
           wx:for="{{options}}" 
-          wx:key="index" 
-          class="option-item"
+          wx:key="index"
+          right-width="{{65}}"
         >
-          <input 
-            class="option-input" 
-            value="{{item.text}}" 
-            placeholder="请输入选项内容"
-            data-index="{{index}}"
-            bindinput="onOptionChange"
-          />
-          <!-- 随机抽选模式下显示赢家勾选框 -->
-          <view wx:if="{{type===2}}" class="winner-checkbox" bindtap="toggleWinner" data-index="{{index}}">
-            <view class="checkbox {{item.isWinner ? 'checked' : ''}}">
-              <image wx:if="{{item.isWinner}}" src="/images/icons/check.png" class="check-icon-small" mode="aspectFit" />
+          <view class="option-item">
+            <input 
+              class="option-input" 
+              value="{{item.text}}" 
+              placeholder="请输入选项内容"
+              data-index="{{index}}"
+              bindinput="onOptionChange"
+            />
+            <!-- 随机抽选模式下显示赢家勾选框 -->
+            <view wx:if="{{type===2}}" class="winner-checkbox">
+              <van-checkbox 
+                value="{{item.isWinner}}" 
+                checked-color="#667eea"
+                icon-size="16px"
+                bind:change="toggleWinner" 
+                data-index="{{index}}"
+              >
+              </van-checkbox>
             </view>
-            <text class="checkbox-label">赢家</text>
           </view>
-          <view class="delete-btn" bindtap="deleteOption" data-index="{{index}}">
-            <image src="/images/icons/delete.png" class="delete-icon" />
+          <view slot="right" class="swipe-delete-btn" bindtap="deleteOption" data-index="{{index}}">
+            <van-icon name="delete-o" color="#fff" size="20px" />
           </view>
-        </view>
+        </van-swipe-cell>
       </view>
       
       <view class="add-option-btn" bindtap="addOption">

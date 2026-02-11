@@ -1,13 +1,13 @@
 // 统一模板定义，便于复用与扩展
 module.exports = [
-  {
-    templateId: 1,
-    title: '礼物抽奖',
-    desc: '适合节日礼物、活动奖品等抽奖场景',
-    icon: '🎁',
-    options: ['中奖', '谢谢参与', '再接再厉', '好运下次'],
-    preferredType: 'random' // 允许重复，随机从 options 选取
-  },
+  // {
+  //   templateId: 1,
+  //   title: '礼物抽奖',
+  //   desc: '适合节日礼物、活动奖品等抽奖场景',
+  //   icon: '🎁',
+  //   options: ['中奖', '谢谢参与', '再接再厉', '好运下次'],
+  //   preferredType: 'random' // 允许重复，随机从 options 选取
+  // },
   {
     templateId: 2,
     title: '活动名额',

@@ -223,24 +223,17 @@ Page({
 
   toggleWinner(e) {
     const { index } = e.currentTarget.dataset
+    const newValue = e.detail // van-checkbox 的 change 事件返回新的值
     const options = [...this.data.options]
-    options[index].isWinner = !options[index].isWinner
+    options[index].isWinner = newValue
     this.setData({ options })
   },
 
   deleteOption(e) {
     const { index } = e.currentTarget.dataset
-    wx.showModal({
-      title: '确认删除',
-      content: '确定要删除这个选项吗？',
-      success: (res) => {
-        if (res.confirm) {
-          const options = [...this.data.options]
-          options.splice(index, 1)
-          this.setData({ options })
-        }
-      }
-    })
+    const options = [...this.data.options]
+    options.splice(index, 1)
+    this.setData({ options })
   },
 
   onExpireDateChange(e) {

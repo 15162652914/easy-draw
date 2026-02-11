@@ -74,72 +74,42 @@
   margin-bottom: 24rpx;
 }
 
-.option-item {
+.options-list .van-swipe-cell {
   margin-bottom: 20rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.option-item {
   display: flex;
   align-items: center;
   position: relative;
+  background-color: #f7f8fa;
+  height: 88rpx;
 }
 
 .option-input {
-  padding-right: 160rpx; /* 增加右侧空间以容纳赢家勾选框 */
+  padding-right: 160rpx; /* 右侧空间以容纳赢家勾选框 */
+  border: none;
+  border-radius: 0;
 }
 
 .winner-checkbox {
   position: absolute;
-  right: 70rpx;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  padding: 8rpx 12rpx;
   z-index: 1;
 }
 
-.checkbox {
-  width: 32rpx;
-  height: 32rpx;
-  border-radius: 6rpx;
-  border: 2rpx solid #dcdfe6;
+.swipe-delete-btn {
+  width: 65px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #fff;
-  transition: all 0.2s ease;
-}
-
-.checkbox.checked {
-  background-color: #67c23a;
-  border-color: #67c23a;
-}
-
-.check-icon-small {
-  width: 20rpx;
-  height: 20rpx;
-}
-
-.checkbox-label {
-  font-size: 24rpx;
-  color: #606266;
-}
-
-.delete-btn {
-  position: absolute;
-  right: 16rpx;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 56rpx;
-  height: 56rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12rpx;
-}
-
-.delete-icon {
-  width: 32rpx;
-  height: 32rpx;
+  background-color: #ee0a24;
+  border-radius: 0 16rpx 16rpx 0;
 }
 
 .add-option-btn {
