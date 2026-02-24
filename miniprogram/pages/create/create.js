@@ -22,7 +22,7 @@ Page({
       // { value: DRAW_TYPE.NORMAL, label: '普通抽签' },
       { value: DRAW_TYPE.SEQUENCE, label: '顺序抽签' },
       { value: DRAW_TYPE.RANDOM, label: '随机抽选' },
-      { value: DRAW_TYPE.GROUP, label: '分组抽签' }
+      // { value: DRAW_TYPE.GROUP, label: '分组抽签' }
     ],
     // 昵称弹窗
     showProfileSheet: false,

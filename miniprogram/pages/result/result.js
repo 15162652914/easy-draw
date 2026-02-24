@@ -155,7 +155,7 @@ Page({
 
     if (draw.type === DRAW_TYPE.GROUP && draw.status === DRAW_STATUS.CLOSED) {
       const grouped = draw.participants.reduce((acc, p) => {
-        const groupName = p.result || '未分配'
+        const groupName = this.resolveResultText(draw, p.result) || '未分配'
         if (!acc[groupName]) acc[groupName] = []
         acc[groupName].push(p)
         return acc
@@ -168,6 +168,13 @@ Page({
 
   resolveResultText(draw, result) {
     if (result === null || result === undefined) return ''
+
+    // 结果为对象时（如 { text, isWinner }），优先取其中可读字段
+    if (typeof result === 'object') {
+      if (result.text) return String(result.text)
+      if (result.value) return String(result.value)
+    }
+
     const opts = Array.isArray(draw.options) ? draw.options : []
     
     // 规范化选项格式：兼容旧格式（字符串数组）和新格式（对象数组）

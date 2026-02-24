@@ -159,6 +159,13 @@ Page({
   // 将结果值映射为选项文本（数字视为 1-based 索引）
   resolveResultText(draw, result) {
     if (result === null || result === undefined) return ''
+
+    // 结果为对象时（如 { text, isWinner }），优先取其中可读字段
+    if (typeof result === 'object') {
+      if (result.text) return String(result.text)
+      if (result.value) return String(result.value)
+    }
+
     const opts = Array.isArray(draw.options) ? draw.options : []
     
     // 规范化选项格式：兼容旧格式（字符串数组）和新格式（对象数组）
