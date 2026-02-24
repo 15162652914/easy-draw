@@ -4,7 +4,7 @@ const db = cloud.database();
 const _ = db.command;
 
 exports.main = async (event, context) => {
-  const { title, type, options, totalCount, groupId, maxParticipants, winnerQuota, creatorInfo, description } = event;
+  const { title, type, options, totalCount, groupId, maxParticipants, winnerQuota, creatorInfo, description, expireTime } = event;
   const wxContext = cloud.getWXContext();
   const openId = wxContext.OPENID;
   
@@ -82,6 +82,8 @@ exports.main = async (event, context) => {
         winnerOption: winnerOption,
         // 新增：创建人信息
         creatorInfo: creatorInfoPayload,
+        // 新增：过期时间（时间戳，毫秒），用于自动关闭
+        expireTime: typeof expireTime === 'number' && expireTime > 0 ? expireTime : null,
         status: 0, // 0 = ongoing
         participants: [],
         groupId: groupId || '',

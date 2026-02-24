@@ -1,4 +1,4 @@
-const { getDrawDetail, closeDraw, joinDraw } = require('../../utils/db')
+const { getDrawDetail, closeDraw, joinDraw, reopenDraw } = require('../../utils/db')
 const { formatTime } = require('../../utils/util')
 const { DRAW_STATUS, DRAW_STATUS_TEXT, DRAW_TYPE, DRAW_TYPE_TEXT } = require('../../utils/constants')
 
@@ -228,6 +228,42 @@ Page({
         } finally {
           wx.hideLoading()
           this.setData({ closing: false })
+        }
+      }
+    })
+  },
+
+  // 重新开启抽签（从 CLOSED/FULL 回到 ONGOING）
+  async handleReopenDraw() {
+    const { drawId, isCreator, drawDetail } = this.data
+    if (!isCreator) {
+      wx.showToast({ title: '仅创建者可操作', icon: 'none' })
+      return
+    }
+    if (!drawDetail || drawDetail.status === DRAW_STATUS.ONGOING) {
+      wx.showToast({ title: '抽签已在进行中', icon: 'none' })
+      return
+    }
+
+    wx.showModal({
+      title: '重新开启抽签',
+      content: '重新开启后，将允许再次参与该抽签，是否继续？',
+      success: async (res) => {
+        if (!res.confirm) return
+        wx.showLoading({ title: '处理中...' })
+        try {
+          const result = await reopenDraw({ drawId })
+          if (result.success) {
+            wx.showToast({ title: '已重新开启', icon: 'success' })
+            // 重新拉取详情，刷新状态
+            this.loadDrawDetail()
+          } else {
+            wx.showToast({ title: result.message || '操作失败', icon: 'none' })
+          }
+        } catch (e) {
+          wx.showToast({ title: '操作失败，请重试', icon: 'none' })
+        } finally {
+          wx.hideLoading()
         }
       }
     })

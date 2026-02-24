@@ -31,10 +31,22 @@ exports.main = async (event, context) => {
       };
     }
 
-    // 2. 状态与上限校验（事务内）
-    if (draw.status === 1) {
+    // 2. 状态、过期与上限校验（事务内）
+    // 优先检查是否已过期：过期则自动置为 CLOSED(1)，并拒绝参与
+    const now = Date.now();
+    if (draw.expireTime && typeof draw.expireTime === 'number' && now > draw.expireTime) {
+      await transaction.collection('draws').doc(drawId).update({
+        data: { status: 1, updateTime: db.serverDate() }
+      });
+      await transaction.commit();
+      return { success: false, data: {}, message: '抽签已过期' };
+    }
+
+    // CLOSED(1) 或 FULL(2) 均视为不可再参与
+    if (draw.status === 1 || draw.status === 2) {
       await transaction.rollback();
-      return { success: false, data: {}, message: '抽签已结束' };
+      const msg = draw.status === 2 ? '名额已满' : '抽签已结束';
+      return { success: false, data: {}, message: msg };
     }
     const upperLimit = (typeof draw.maxParticipants === 'number' && draw.maxParticipants > 0)
       ? draw.maxParticipants
@@ -44,9 +56,10 @@ exports.main = async (event, context) => {
           ? draw.options.length
           : 0;
     if (upperLimit > 0 && participants.length >= upperLimit) {
-      await transaction.collection('draws').doc(drawId).update({ data: { status: 1, updateTime: db.serverDate() } });
+      // 名额占满：更新为 FULL(2)，后续参与将被拒绝
+      await transaction.collection('draws').doc(drawId).update({ data: { status: 2, updateTime: db.serverDate() } });
       await transaction.commit();
-      return { success: false, data: {}, message: '抽签已结束' };
+      return { success: false, data: {}, message: '名额已满' };
     }
 
     // 3. 分配结果（事务内从签池弹出一个）

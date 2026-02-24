@@ -77,6 +77,7 @@
         <view wx:if="{{drawDetail.status === 1}}" class="action-btn" bindtap="copyResult">复制结果</view>
         <view wx:if="{{!hasParticipated && drawDetail.status === 0}}" class="action-btn primary" bindtap="handleJoinInline">立即参与</view>
         <view wx:if="{{isCreator && drawDetail.status !== 1}}" class="action-btn danger {{closing ? 'disabled' : ''}}" bindtap="handleCloseDraw">{{closing ? '结束中…' : '结束抽签'}}</view>
+        <view wx:if="{{isCreator && drawDetail.status !== 0}}" class="action-btn" bindtap="handleReopenDraw">重新开启</view>
       </view>
 
       <!-- 昵称编辑弹窗 -->

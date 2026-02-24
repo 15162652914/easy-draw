@@ -133,6 +133,23 @@ export const closeDraw = async (data) => {
   }
 }
 
+// 重新开启抽签（仅创建者）
+export const reopenDraw = async (data) => {
+  try {
+    const result = await wx.cloud.callFunction({
+      name: 'reopenDraw',
+      data
+    })
+    return result.result
+  } catch (error) {
+    console.error('重新开启抽签失败:', error)
+    return {
+      success: false,
+      message: '网络错误，请重试'
+    }
+  }
+}
+
 // （可选）保存用户基础信息：头像、昵称等
 // 说明：
 // - 仅提供能力，当前默认不在登录流程中自动调用
