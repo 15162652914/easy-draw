@@ -2,6 +2,20 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
+// 本地内置头像列表（与 miniprogram/images/avatars 下的文件保持一致）
+const AVATAR_LIST = [
+  '/images/avatars/boy-01.png',
+  '/images/avatars/boy-02.png',
+  '/images/avatars/girl-01.png',
+  '/images/avatars/girl-02.png'
+]
+
+function pickRandomAvatar() {
+  if (!AVATAR_LIST.length) return ''
+  const idx = Math.floor(Math.random() * AVATAR_LIST.length)
+  return AVATAR_LIST[idx]
+}
+
 /**
  * 保存/更新用户基础信息
  * 说明：
@@ -49,9 +63,17 @@ exports.main = async (event, context) => {
       return { success: true, message: '无用户信息需要更新', data: { skipped: true } }
     }
 
+    const payloadNickName = userInfo.nickName || (existing && (existing.nickName || existing.nickname)) || ''
+
+    // 优先使用传入的头像或历史头像；都没有时为用户随机分配一个内置头像
+    let payloadAvatarUrl = userInfo.avatarUrl || (existing && (existing.avatarUrl || existing.avatar)) || ''
+    if (!payloadAvatarUrl) {
+      payloadAvatarUrl = pickRandomAvatar()
+    }
+
     const payload = {
-      nickName: userInfo.nickName || (existing && (existing.nickName || existing.nickname)) || '',
-      avatarUrl: userInfo.avatarUrl || (existing && (existing.avatarUrl || existing.avatar)) || '',
+      nickName: payloadNickName,
+      avatarUrl: payloadAvatarUrl,
       lastSeen: db.serverDate()
     }
 
