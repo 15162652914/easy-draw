@@ -129,7 +129,8 @@ Page({
             statusText: DRAW_STATUS_TEXT[statusVal] || '',
             statusClass: displayClass,
             typeText: this.getTypeText(draw.type),
-            createTimeFormatted: this.formatTime(draw.createTime)
+            createTimeFormatted: this.formatTime(draw.createTime),
+            expireTimeFormatted: draw.expireTime ? this.formatTime(draw.expireTime) : ''
           }
         })
         

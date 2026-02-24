@@ -92,6 +92,12 @@ Page({
     if (!draw) return null
 
     draw.createTimeFormatted = formatTime(draw.createTime)
+    // 截止时间（如配置了 expireTime，则用于展示）
+    if (draw.expireTime) {
+      draw.expireTimeFormatted = formatTime(draw.expireTime)
+    } else {
+      draw.expireTimeFormatted = ''
+    }
     
     // 兼容旧字符串类型或新版数值枚举
     let typeVal = draw.type

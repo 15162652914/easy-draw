@@ -51,9 +51,13 @@
           <image class="info-icon" src="/images/icons/user.png" />
           <text class="info-text">创建者: {{item.creatorInfo.nickName}}</text>
         </view>
+        <view wx:if="{{item.expireTimeFormatted}}" class="info-line">
+          <image class="info-icon" src="/images/icons/time.png" />
+          <text class="info-text">截止时间: {{item.expireTimeFormatted}}</text>
+        </view>
         <view class="info-line">
           <image class="info-icon" src="/images/icons/time.png" />
-          <text class="info-text">时间: {{item.createTimeFormatted}}</text>
+          <text class="info-text">创建时间: {{item.createTimeFormatted}}</text>
         </view>
         <view wx:if="{{activeTab === 'participated' && item.hasParticipated}}" class="info-line my-result">
           <image class="info-icon" src="/images/icons/gift.png" />

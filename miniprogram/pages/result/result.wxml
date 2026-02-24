@@ -27,8 +27,11 @@
       <view class="info-body info-desc">
         <text>描述：{{drawDetail.description || '暂无描述'}}</text>
       </view>
+      <view class="info-body info-meta" wx:if="{{drawDetail.expireTimeFormatted}}">
+        <text>截止时间：{{drawDetail.expireTimeFormatted}}</text>
+      </view>
       <view class="info-body info-meta">
-        <text>时间：{{drawDetail.createTimeFormatted}}</text>
+        <text>创建时间：{{drawDetail.createTimeFormatted}}</text>
         <text>参与：{{drawDetail.participantCount}}{{drawDetail.upperLimit ? (' / ' + drawDetail.upperLimit) : ''}}</text>
       </view>
     </view>
