@@ -91,5 +91,16 @@
         bind:confirm="onProfileSheetConfirm"
         bind:close="onProfileSheetClose"
       />
+      <!-- 动画组件 -->
+      <view wx:if="{{showDrawAnimation}}" class="draw-animation-mask">
+        <view class="draw-animation-panel">
+          <draw-animation 
+            id="drawAnim"
+            autoStart="{{false}}"
+            bind:onDrawStart="onDrawStart"
+            bind:onDrawComplete="onDrawComplete">
+          </draw-animation>
+        </view>
+      </view>
   </view>
 </view>

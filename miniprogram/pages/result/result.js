@@ -18,6 +18,9 @@ Page({
     // 参与相关
     userInfo: null,
     joining: false,
+    showDrawAnimation: false,
+    // 抽签结果：等待动画结束再落盘
+    pendingJoinResult: null,
     // 昵称弹窗
     showProfileSheet: false,
     pendingProfileAction: ''
@@ -348,15 +351,113 @@ Page({
       return
     }
 
-    await this.doJoinInline()
+    // 显示动画组件后再触发抽签，避免组件平时占位
+    this.setData({ showDrawAnimation: true }, async () => {
+      const comp = this.selectComponent && this.selectComponent('#drawAnim')
+      if (comp && comp.startDraw) {
+        comp.startDraw()
+      } else {
+        this.setData({ showDrawAnimation: false })
+        await this.doJoinInline()
+      }
+    })
+  },
+
+  // 动画组件请求开始抽签时触发
+  async onDrawStart() {
+    const { userInfo, hasParticipated, joining, drawDetail } = this.data
+
+    if (hasParticipated) {
+      this.setData({ showDrawAnimation: false })
+      wx.showToast({ title: '已参与', icon: 'none' })
+      return
+    }
+    if (joining) {
+      this.setData({ showDrawAnimation: false })
+      return
+    }
+    if (!drawDetail || drawDetail.status !== DRAW_STATUS.ONGOING) {
+      this.setData({ showDrawAnimation: false })
+      wx.showToast({ title: '此抽签当前不可参与', icon: 'none' })
+      return
+    }
+    if (!userInfo || !userInfo.nickName) {
+      this.setData({ showDrawAnimation: false })
+      this.openProfileSheet('join-inline')
+      return
+    }
+
+    // 通过动画触发：等动画结束再更新页面
+    await this.doJoinInline(true)
+  },
+
+  // 动画组件完成回调：在这里真正更新页面并提示
+  onDrawComplete(e) {
+    const pending = this.data.pendingJoinResult
+    if (!pending) {
+      this.setData({ showDrawAnimation: false })
+      return
+    }
+
+    const { drawDetail, userInfo } = this.data
+    if (!drawDetail || !userInfo) {
+      this.setData({ pendingJoinResult: null, joining: false, showDrawAnimation: false })
+      return
+    }
+
+    const updatedDetail = Object.assign({}, drawDetail)
+    const openId = wx.getStorageSync('openId')
+    const rawResult = pending.rawResult
+
+    const participant = {
+      openId,
+      nickName: userInfo.nickName,
+      avatar: userInfo.avatarUrl,
+      result: rawResult,
+      resultText: this.resolveResultText(updatedDetail, rawResult),
+      drawTime: Date.now()
+    }
+    updatedDetail.participants = updatedDetail.participants ? [...updatedDetail.participants, participant] : [participant]
+
+    // 根据上限更新状态（满员则置为已结束）
+    const upperLimit = (typeof updatedDetail.maxParticipants === 'number' && updatedDetail.maxParticipants > 0)
+      ? updatedDetail.maxParticipants
+      : (typeof updatedDetail.totalCount === 'number' && updatedDetail.totalCount > 0)
+        ? updatedDetail.totalCount
+        : (updatedDetail.options?.length || 0)
+    if (upperLimit > 0 && updatedDetail.participants.length >= upperLimit) {
+      updatedDetail.status = DRAW_STATUS.CLOSED
+      updatedDetail.statusText = DRAW_STATUS_TEXT[DRAW_STATUS.CLOSED]
+      updatedDetail.statusClass = 'closed'
+    }
+
+    const myResultText = this.resolveResultText(updatedDetail, rawResult)
+
+    // 在动画结束时再提示成功
+    wx.showToast({ title: pending.message || '参与成功', icon: 'success' })
+
+    this.setData({
+      drawDetail: this.processDrawData(updatedDetail, openId),
+      hasParticipated: true,
+      myResult: rawResult,
+      myResultText,
+      joining: false,
+      pendingJoinResult: null,
+      showDrawAnimation: false
+    })
   },
 
   // 真正执行参与逻辑（假定已具备合法 userInfo）
-  async doJoinInline() {
+  // useAnimation=true 表示通过动画触发，结果先缓存，等动画结束再更新页面
+  async doJoinInline(useAnimation = false) {
     const { drawId, userInfo, drawDetail, hasParticipated, joining } = this.data
-    if (hasParticipated || joining) return
+    if (hasParticipated || joining) {
+      this.setData({ showDrawAnimation: false })
+      return
+    }
 
     if (!drawDetail || drawDetail.status !== DRAW_STATUS.ONGOING) {
+      this.setData({ showDrawAnimation: false })
       wx.showToast({ title: '此抽签当前不可参与', icon: 'none' })
       return
     }
@@ -374,6 +475,7 @@ Page({
       wx.hideLoading()
 
       if (!result.success) {
+        this.setData({ joining: false, showDrawAnimation: false })
         wx.showToast({ title: result.message || '参与失败，请重试', icon: 'none' })
         return
       }
@@ -381,51 +483,82 @@ Page({
       // 如果云函数返回已参与情况，直接刷新详情并提示
       if (result.data?.hasJoined) {
         wx.showToast({ title: result.message || '已参与', icon: 'success' })
-        this.setData({ hasParticipated: true, joining: false })
+        this.setData({ hasParticipated: true, joining: false, showDrawAnimation: false })
         this.loadDrawDetail()
         return
       }
 
-      wx.showToast({ title: result.message || '参与成功', icon: 'success' })
-
-      // 更新本地状态：把新参与者追加到 participants，并刷新“我的结果”等
-      const updatedDetail = Object.assign({}, drawDetail)
-      const openId = wx.getStorageSync('openId')
       const rawResult = result.data?.result ?? null
-      const participant = {
-        openId,
-        nickName: userInfo.nickName,
-        avatar: userInfo.avatarUrl,
-        result: rawResult,
-        resultText: this.resolveResultText(updatedDetail, rawResult),
-        drawTime: Date.now()
+
+      if (useAnimation) {
+        // 动画模式：先把结果缓存，调用组件展示动画，等 onDrawComplete 再更新页面
+        const myResultText = this.resolveResultText(drawDetail, rawResult)
+        this.setData({
+          pendingJoinResult: {
+            rawResult,
+            message: result.message || '参与成功',
+            text: myResultText
+          }
+        })
+
+        const comp = this.selectComponent && this.selectComponent('#drawAnim')
+        if (comp && comp.showResult) {
+          const num = parseInt(rawResult, 10)
+          const animPayload = {
+            number: isNaN(num) ? 1 : num,
+            type: 'neutral',
+            label: myResultText,
+            icon: '✨',
+            desc: myResultText
+          }
+          comp.showResult(animPayload)
+        } else {
+          this.setData({ pendingJoinResult: null, joining: false, showDrawAnimation: false })
+          wx.showToast({ title: result.message || '参与成功', icon: 'success' })
+          this.loadDrawDetail()
+        }
+      } else {
+        // 非动画模式：保持原逻辑，立刻更新页面并提示
+        wx.showToast({ title: result.message || '参与成功', icon: 'success' })
+
+        const updatedDetail = Object.assign({}, drawDetail)
+        const openId = wx.getStorageSync('openId')
+        const participant = {
+          openId,
+          nickName: userInfo.nickName,
+          avatar: userInfo.avatarUrl,
+          result: rawResult,
+          resultText: this.resolveResultText(updatedDetail, rawResult),
+          drawTime: Date.now()
+        }
+        updatedDetail.participants = updatedDetail.participants ? [...updatedDetail.participants, participant] : [participant]
+
+        // 根据上限更新状态（满员则置为已结束）
+        const upperLimit = (typeof updatedDetail.maxParticipants === 'number' && updatedDetail.maxParticipants > 0)
+          ? updatedDetail.maxParticipants
+          : (typeof updatedDetail.totalCount === 'number' && updatedDetail.totalCount > 0)
+            ? updatedDetail.totalCount
+            : (updatedDetail.options?.length || 0)
+        if (upperLimit > 0 && updatedDetail.participants.length >= upperLimit) {
+          updatedDetail.status = DRAW_STATUS.CLOSED
+          updatedDetail.statusText = DRAW_STATUS_TEXT[DRAW_STATUS.CLOSED]
+          updatedDetail.statusClass = 'closed'
+        }
+
+        const myResultText = this.resolveResultText(updatedDetail, rawResult)
+
+        this.setData({
+          drawDetail: this.processDrawData(updatedDetail, openId),
+          hasParticipated: true,
+          myResult: rawResult,
+          myResultText,
+          joining: false,
+          showDrawAnimation: false
+        })
       }
-      updatedDetail.participants = updatedDetail.participants ? [...updatedDetail.participants, participant] : [participant]
-
-      // 根据上限更新状态（满员则置为 FULL）
-      const upperLimit = (typeof updatedDetail.maxParticipants === 'number' && updatedDetail.maxParticipants > 0)
-        ? updatedDetail.maxParticipants
-        : (typeof updatedDetail.totalCount === 'number' && updatedDetail.totalCount > 0)
-          ? updatedDetail.totalCount
-          : (updatedDetail.options?.length || 0)
-      if (upperLimit > 0 && updatedDetail.participants.length >= upperLimit) {
-        updatedDetail.status = DRAW_STATUS.FULL
-        updatedDetail.statusText = DRAW_STATUS_TEXT[DRAW_STATUS.FULL]
-        updatedDetail.statusClass = 'closed'
-      }
-
-      const myResultText = this.resolveResultText(updatedDetail, rawResult)
-
-      this.setData({
-        drawDetail: this.processDrawData(updatedDetail, openId),
-        hasParticipated: true,
-        myResult: rawResult,
-        myResultText,
-        joining: false
-      })
     } catch (error) {
       wx.hideLoading()
-      this.setData({ joining: false })
+      this.setData({ joining: false, pendingJoinResult: null, showDrawAnimation: false })
       wx.showToast({ title: '参与失败，请重试', icon: 'none' })
       console.error('结果页参与抽签失败:', error)
     }
@@ -448,22 +581,23 @@ Page({
   onProfileSheetConfirm(e) {
     const { userInfo, openId } = e.detail || {}
     const { pendingProfileAction } = this.data
-
-    this.setData({ showProfileSheet: false, pendingProfileAction: '' })
+    const nextData = { showProfileSheet: false, pendingProfileAction: '' }
 
     if (userInfo) {
-      this.setData({ userInfo })
+      nextData.userInfo = userInfo
       wx.setStorageSync('userInfo', userInfo)
     }
 
     if (openId) {
       wx.setStorageSync('openId', openId)
-      this.setData({ openId })
+      nextData.openId = openId
     }
 
-    if (pendingProfileAction === 'join-inline') {
-      this.doJoinInline()
-    }
+    this.setData(nextData, () => {
+      if (pendingProfileAction === 'join-inline') {
+        this.handleJoinInline()
+      }
+    })
   },
 
   goToHome() {

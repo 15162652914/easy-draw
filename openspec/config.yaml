@@ -1,0 +1,25 @@
+schema: spec-driven
+
+context: |
+	项目：Easy Draw 微信小程序
+	技术栈：微信小程序（WXML/WXSS/JS）、微信云开发（CloudBase/TCB）、Node.js、Vant Weapp 组件库
+	主要功能：抽签/抽奖、模板管理、多人参与、结果展示与分享、历史记录
+	亮点：模板驱动、公平抽签、云端/本地回退、分组/随机/顺序抽签、分页历史、云函数解耦
+	云端集合：draws、templates、counters、users
+	云函数：createDraw、joinDraw、getOpenId、createTemplate、listTemplates、entry
+	依赖：@vant/weapp
+	代码规范：优先使用 async/await，注释清晰，状态/类型常量集中管理
+	参考文档：README.md、miniprogram/utils/constants.js
+
+rules:
+	proposal:
+		- 保持提案简明扼要，突出目标与价值
+		- 必须包含“目标/动机”“方案概述”“影响面”
+		- 推荐补充“非目标”与“风险”
+	tasks:
+		- 拆分为 2 小时内可完成的子任务
+		- 明确交付物与验收标准
+		- 代码需通过 lint/构建/基本功能测试
+	spec:
+		- 结构清晰，必要时配合数据模型/流程图
+		- 关键状态、类型、接口需有说明

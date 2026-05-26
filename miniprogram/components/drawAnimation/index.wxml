@@ -1,0 +1,56 @@
+<view class="draw-stage {{stage}}" bindtap="startDraw">
+  
+  <!-- 背景氛围 -->
+  <view class="atmosphere {{resultType}}">
+    <view class="particles" wx:for="{{particles}}" wx:key="index" 
+          style="left:{{item.x}}%;top:{{item.y}}%;animation-delay:{{item.delay}}s">
+      {{item.icon}}
+    </view>
+  </view>
+
+  <!-- 竹筒主体 -->
+  <view class="bamboo-tube {{shakeClass}}" style="transform: {{tubeTransform}}">
+    <!-- 筒身 -->
+    <view class="tube-body">
+      <view class="tube-texture"></view>
+      <view class="tube-ring top"></view>
+      <view class="tube-ring bottom"></view>
+    </view>
+    
+    <!-- 筒口（椭圆） -->
+    <view class="tube-opening">
+      <view class="opening-inner"></view>
+    </view>
+    
+    <!-- 内部签条（摇晃时可见） -->
+    <view class="inner-sticks">
+      <view class="stick s1" style="transform: rotate({{innerRotate}}deg)"></view>
+      <view class="stick s2" style="transform: rotate({{innerRotate}}deg)"></view>
+      <view class="stick s3" style="transform: rotate({{innerRotate}}deg)"></view>
+    </view>
+  </view>
+
+  <!-- 飞出的签条（阶段3出现） -->
+  <view class="flying-stick {{flyClass}}" style="transform: {{flyTransform}}">
+    <view class="stick-body {{resultType}}">
+      <text class="stick-number">{{resultNumber}}</text>
+      <view class="stick-label">{{resultLabel}}</view>
+    </view>
+    <view class="stick-tail"></view>
+  </view>
+
+  <!-- 结果展示（阶段4出现） -->
+  <view class="result-reveal {{revealClass}}">
+    <view class="result-card {{resultType}}">
+      <view class="card-glow"></view>
+      <text class="result-icon">{{resultIcon}}</text>
+      <text class="result-text">{{resultLabel}}</text>
+      <text class="result-desc">{{resultDesc}}</text>
+    </view>
+  </view>
+
+  <!-- 提示文字 -->
+  <view class="hint-text {{hintClass}}">
+    {{hintText}}
+  </view>
+</view>

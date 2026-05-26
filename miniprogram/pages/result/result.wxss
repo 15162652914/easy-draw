@@ -304,6 +304,29 @@
   border: none;
 }
 
+.draw-animation-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 32rpx;
+  background: rgba(24, 18, 12, 0.36);
+}
+
+.draw-animation-panel {
+  width: 100%;
+  max-width: 680rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 30rpx 80rpx rgba(44, 30, 18, 0.28);
+}
+
 .winner-option {
   font-size: 40rpx;
   font-weight: bold;

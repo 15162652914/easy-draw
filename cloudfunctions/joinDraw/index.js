@@ -171,6 +171,10 @@ exports.main = async (event, context) => {
       updateTime: db.serverDate(),
       participants: updatedParticipants
     };
+    // 如果参与人数已达上限，自动结束抽签
+    if (upperLimit > 0 && updatedParticipants.length >= upperLimit) {
+      updateData.status = 1; // CLOSED
+    }
     if (pick !== null && pick !== undefined) {
       updateData[`lotsPool.${pick}`] = null;
     }

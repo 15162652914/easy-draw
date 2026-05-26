@@ -2,6 +2,7 @@
   "navigationBarTitleText": "抽签结果",
   "enablePullDownRefresh": true,
   "usingComponents": {
-    "profile-sheet": "/components/profileSheet/index"
+    "profile-sheet": "/components/profileSheet/index",
+    "draw-animation": "/components/drawAnimation/index"
   }
 }
